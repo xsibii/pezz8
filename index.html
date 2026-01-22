@@ -6,7 +6,7 @@
     <title>PEZZ8</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root { --primary: #e50914; --dark: #141414; --light: #fff; --gray: #bcbcbc; }
+        :root { --primary: #e50914; --dark: #141414; --light: #fff; --gray: #bcbcbc; --toast-bg: #46d369; }
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
@@ -17,77 +17,76 @@
             line-height: 1.4;
         }
 
-        /* --- HEADER --- */
-        .header { position: fixed; top: 0; width: 100%; padding: 20px 4%; background: linear-gradient(180deg, rgba(0,0,0,0.8) 10%, transparent); display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.3s; }
+        /* --- HEADER & RICERCA --- */
+        .header { position: fixed; top: 0; width: 100%; padding: 15px 4%; background: linear-gradient(180deg, rgba(0,0,0,0.8) 10%, transparent); display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.3s; }
         .header.scrolled { background-color: #141414; }
         .logo { font-size: 28px; font-weight: bold; color: var(--primary); text-transform: uppercase; cursor: pointer; letter-spacing: 2px; }
         
         .search-container { display: flex; gap: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 4px; align-items: center; }
-        .search-input { background: transparent; border: none; color: #fff; outline: none; width: 180px; font-size: 0.9rem; }
+        .search-input { background: transparent; border: none; color: #fff; outline: none; width: 200px; font-size: 0.9rem; }
 
-        /* --- CATEGORIES (OLD STYLE) --- */
-        .genres-bar { display: flex; gap: 12px; padding: 20px 4%; overflow-x: auto; scrollbar-width: none; margin-top: 10px; }
+        /* --- NAVIGAZIONE & CATEGORIE --- */
+        .nav-tabs { display: flex; justify-content: center; gap: 30px; margin: 20px 0; }
+        .nav-tab { cursor: pointer; color: var(--gray); font-weight: bold; padding: 10px; border-bottom: 3px solid transparent; transition: 0.3s; }
+        .nav-tab.active { color: #fff; border-bottom-color: var(--primary); }
+
+        .genres-bar { display: flex; gap: 12px; padding: 10px 4%; overflow-x: auto; scrollbar-width: none; }
         .genres-bar::-webkit-scrollbar { display: none; }
-        .genre-pill { padding: 8px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 0.9rem; }
+        .genre-pill { padding: 8px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 0.8rem; }
         .genre-pill:hover, .genre-pill.active { background: #fff; color: #000; }
 
         /* --- HERO --- */
-        .hero { height: 75vh; position: relative; background-size: cover; background-position: center; display: flex; align-items: center; padding: 0 4%; margin-top: -80px; }
+        .hero { height: 70vh; position: relative; background-size: cover; background-position: center; display: flex; align-items: center; padding: 0 4%; margin-top: -80px; transition: 0.5s; }
         .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 70%); }
         .hero::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 200px; background: linear-gradient(to top, var(--dark), transparent); }
         .hero-content { position: relative; z-index: 10; max-width: 600px; }
         .hero-title { font-size: 3.5rem; margin-bottom: 15px; font-weight: 800; line-height: 1.1; }
         .hero-overview { font-size: 1.1rem; margin-bottom: 25px; color: #eee; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* --- BUTTONS --- */
-        .btn { padding: 12px 25px; border-radius: 4px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-right: 12px; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s; }
+        /* --- BOTTONI --- */
+        .btn { padding: 10px 20px; border-radius: 4px; border: none; font-size: 1rem; font-weight: bold; cursor: pointer; margin-right: 10px; display: inline-flex; align-items: center; gap: 8px; transition: 0.2s; }
         .btn-play { background: #fff; color: #000; }
         .btn-info { background: rgba(109,109,110,0.7); color: #fff; backdrop-filter: blur(10px); }
+        .btn-trailer { background: transparent; border: 1px solid #fff; color: #fff; }
 
-        /* --- ROWS & ARROWS --- */
-        .content-section { padding: 20px 0; position: relative; overflow: visible; }
-        .row-header { font-size: 1.4rem; margin-left: 4%; margin-bottom: 10px; color: #e5e5e5; font-weight: 600; }
+        /* --- ROWS & CARDS --- */
+        .content-section { padding: 15px 0; position: relative; overflow: visible; }
+        .row-header { font-size: 1.4rem; margin-left: 4%; margin-bottom: 5px; color: #e5e5e5; font-weight: 600; }
         .row-wrapper { position: relative; padding: 0 4%; }
-        .row-container { 
-            display: flex; 
-            gap: 10px; 
-            overflow-x: hidden;
-            overflow-y: hidden;
-            scroll-behavior: smooth;
-            padding: 20px 0;
-        }
-
-        .scroll-arrow {
-            position: absolute; top: 0; bottom: 0; width: 4%; background: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s; font-size: 2rem;
-        }
+        .row-container { display: flex; gap: 10px; overflow-x: hidden; overflow-y: hidden; scroll-behavior: smooth; padding: 20px 0; }
+        
+        .scroll-arrow { position: absolute; top: 0; bottom: 0; width: 4%; background: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s; font-size: 2rem; display: flex; align-items: center; justify-content: center; }
         .row-wrapper:hover .scroll-arrow { opacity: 1; }
         .arrow-left { left: 0; } .arrow-right { right: 0; }
 
-        .card { flex: 0 0 auto; width: 200px; aspect-ratio: 2/3; border-radius: 4px; position: relative; cursor: pointer; transition: transform 0.3s; background: #222; }
+        .card { flex: 0 0 auto; width: 180px; aspect-ratio: 2/3; border-radius: 4px; position: relative; cursor: pointer; transition: transform 0.3s; background: #222; }
         .card:hover { transform: scale(1.1); z-index: 10; }
         .card img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
+        
+        .cw-label { position: absolute; bottom: 0; left: 0; width: 100%; background: rgba(0,0,0,0.85); color: #fff; font-size: 0.7rem; padding: 5px; text-align: center; border-bottom-left-radius: 4px; border-bottom-right-radius: 4px; }
 
-        /* --- TOP 10 --- */
-        .top10-card { width: 230px; margin-left: 50px; overflow: visible; }
-        .rank-number {
-            position: absolute;
-            left: -60px;
-            bottom: -20px;
-            font-size: 160px;
-            font-weight: 900;
-            color: var(--dark);
-            -webkit-text-stroke: 3px #777;
-            z-index: 1;
-            line-height: 1;
-            pointer-events: none;
-        }
+        .top10-card { width: 220px; margin-left: 50px; }
+        .rank-number { position: absolute; left: -60px; bottom: -20px; font-size: 150px; font-weight: 900; color: var(--dark); -webkit-text-stroke: 3px #777; z-index: -1; pointer-events: none; }
 
-        /* --- MODAL --- */
+        /* --- MODALE --- */
         .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; overflow-y: auto; }
-        .modal-box { background: #181818; width: 90%; max-width: 850px; margin: 40px auto; border-radius: 10px; overflow: hidden; position: relative; }
+        .modal-box { background: #181818; width: 90%; max-width: 850px; margin: 30px auto; border-radius: 10px; overflow: hidden; position: relative; padding-bottom: 40px; }
+        .modal-body { padding: 40px; margin-top: -80px; position: relative; background: linear-gradient(to top, #181818 90%, transparent); }
+        
+        .cast-container { display: flex; gap: 15px; overflow-x: auto; padding: 10px 0; scrollbar-width: none; }
+        .cast-card { flex: 0 0 auto; width: 80px; text-align: center; }
+        .cast-img { width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-bottom: 5px; border: 2px solid #333; }
+        .cast-name { font-size: 0.7rem; color: #fff; display: block; }
 
+        .similar-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; margin-top: 20px; }
+        .similar-item { cursor: pointer; transition: 0.2s; position: relative; }
+        .similar-item img { width: 100%; border-radius: 4px; }
+
+        /* --- PLAYER --- */
         .video-player { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
+        .player-header { position: absolute; top: 0; width: 100%; padding: 20px; display: flex; justify-content: flex-end; z-index: 3001; background: linear-gradient(to bottom, rgba(0,0,0,0.7), transparent); }
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: var(--toast-bg); color: #fff; padding: 12px 25px; border-radius: 4px; font-weight: bold; z-index: 5000; display: none; box-shadow: 0 5px 15px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
@@ -96,7 +95,7 @@
         <div class="logo" onclick="location.reload()">PEZZ8</div>
         <div class="search-container">
             <i class="fas fa-search"></i>
-            <input type="text" class="search-input" id="searchInput" placeholder="Titoli, generi...">
+            <input type="text" class="search-input" id="searchInput" placeholder="Cerca...">
         </div>
     </header>
 
@@ -106,55 +105,61 @@
             <p class="hero-overview" id="heroOverview"></p>
             <div class="hero-buttons">
                 <button class="btn btn-play" id="heroPlayBtn"><i class="fas fa-play"></i> Riproduci</button>
-                <button class="btn btn-info" id="heroInfoBtn"><i class="fas fa-info-circle"></i> Altre Info</button>
+                <button class="btn btn-info" id="heroInfoBtn"><i class="fas fa-info-circle"></i> Info</button>
             </div>
         </div>
     </div>
 
-    <div class="nav-tabs" style="display:flex; justify-content:center; gap:30px; margin: 20px 0;">
-        <div class="nav-tab active" id="tab-movie" onclick="switchTab('movie')" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">Film</div>
-        <div class="nav-tab" id="tab-tv" onclick="switchTab('tv')" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">Serie TV</div>
-        <div class="nav-tab" id="tab-list" onclick="loadMyListTab()" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">La mia Lista</div>
+    <div class="nav-tabs">
+        <div class="nav-tab active" id="tab-movie" onclick="switchTab('movie')">Film</div>
+        <div class="nav-tab" id="tab-tv" onclick="switchTab('tv')">Serie TV</div>
+        <div class="nav-tab" id="tab-list" onclick="loadMyListTab()">La mia Lista</div>
     </div>
 
     <div class="genres-bar" id="genreFilters"></div>
 
     <div id="mainContent"></div>
-    <div id="infiniteLoader" style="text-align:center; padding:40px; color:#666;">Caricamento suggerimenti...</div>
+    <div id="infiniteLoader" style="text-align:center; padding:40px; color:#666;">Caricamento...</div>
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <div id="modalBackdrop" style="height:450px; background-size:cover; background-position:center; position:relative;">
-                <button onclick="closeModal()" style="position:absolute; right:20px; top:20px; background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:2rem; cursor:pointer; width:45px; height:45px; border-radius:50%; z-index:10;">&times;</button>
+            <div id="modalBackdrop" style="height:450px; background-size:cover; background-position:top; position:relative;">
+                <button onclick="closeModal()" style="position:absolute; right:20px; top:20px; background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:2rem; width:45px; height:45px; border-radius:50%; cursor:pointer; z-index:10;">&times;</button>
             </div>
-            <div style="padding: 40px; margin-top: -60px; position: relative; background: linear-gradient(to top, #181818 85%, transparent);">
-                <h2 id="modalTitle" style="font-size:3rem; margin-bottom:15px;"></h2>
+            <div class="modal-body">
+                <h2 id="modalTitle" style="font-size:2.5rem; margin-bottom:10px;"></h2>
+                <div id="modalMeta" style="margin-bottom:20px; color:#aaa; font-weight:bold;"></div>
                 
-                <div id="seriesControls" style="display:none; margin-bottom:20px; background:#252525; padding:15px; border-radius:8px; display: flex; gap: 10px; align-items: center;">
-                    <div style="flex: 1;">
-                        <label style="font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 5px;">Stagione</label>
-                        <select id="seasonSelect" onchange="updateEpisodes()" style="width: 100%; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
-                    </div>
-                    <div style="flex: 2;">
-                        <label style="font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 5px;">Episodio</label>
-                        <select id="episodeSelect" style="width: 100%; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
-                    </div>
+                <div id="seriesControls" style="display:none; margin-bottom:20px; background:#252525; padding:15px; border-radius:8px; display: flex; gap: 10px;">
+                    <select id="seasonSelect" onchange="updateEpisodes()" style="flex:1; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
+                    <select id="episodeSelect" style="flex:2; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
                 </div>
 
-                <p id="modalOverview" style="font-size:1.1rem; color:#d2d2d2; margin-bottom:30px; max-width: 80%;"></p>
+                <p id="modalOverview" style="font-size:1rem; color:#d2d2d2; margin-bottom:20px;"></p>
                 
-                <div style="display:flex; gap:15px;">
+                <div style="display:flex; gap:10px; margin-bottom:30px;">
                     <button class="btn btn-play" onclick="playCurrentMedia()"><i class="fas fa-play"></i> Guarda Ora</button>
-                    <button class="btn btn-info" id="addToListBtn" onclick="toggleMyList()"><i class="fas fa-plus"></i> La mia Lista</button>
+                    <button class="btn btn-trailer" id="trailerBtn"><i class="fas fa-film"></i> Trailer</button>
+                    <button class="btn btn-info" id="addToListBtn" onclick="toggleMyList()"><i class="fas fa-plus"></i> Lista</button>
                 </div>
+
+                <h4 style="margin-bottom:10px;">Cast Principale</h4>
+                <div class="cast-container" id="modalCast"></div>
+
+                <!-- <h4 style="margin-top:30px;">Contenuti Simili</h4>
+                <div class="similar-grid" id="modalSimilar"></div> -->
             </div>
         </div>
     </div>
 
     <div class="video-player" id="videoPlayer">
-        <button onclick="closePlayer()" style="position:absolute; top:30px; right:30px; background:#fff; padding:10px 20px; font-weight:bold; cursor:pointer; border:none; z-index: 3002;">CHIUDI</button>
+        <div class="player-header">
+            <button onclick="closePlayer()" style="background:#fff; color:#000; padding:10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px;">CHIUDI</button>
+        </div>
         <iframe id="playerFrame" allowfullscreen></iframe>
     </div>
+
+    <div class="toast" id="toast"></div>
 
     <script>
         const API_KEY = 'ca20c0945f1bea10a8f9212a3f53a518'; 
@@ -167,18 +172,21 @@
             genres: [],
             loadedGenreIndex: 0,
             isLoading: false,
-            modalItem: null,
-            myList: JSON.parse(localStorage.getItem('pezz8_mylist')) || {}
+            searchTimeout: null,
+            myList: JSON.parse(localStorage.getItem('pezz8_mylist')) || {},
+            continueWatching: JSON.parse(localStorage.getItem('pezz8_cw')) || []
         };
 
         window.onload = init;
 
         async function init() {
             await loadHero();
+            renderContinueWatching();
             await loadTop10();
             await loadGenresBar();
             await loadMoreRows();
             setupInfiniteScroll();
+            setupLiveSearch();
         }
 
         async function fetchAPI(endpoint, params = '') {
@@ -186,6 +194,31 @@
             return await res.json();
         }
 
+        // --- RICERCA ISTANTANEA ---
+        function setupLiveSearch() {
+            const input = document.getElementById('searchInput');
+            input.addEventListener('input', () => {
+                clearTimeout(state.searchTimeout);
+                state.searchTimeout = setTimeout(async () => {
+                    const query = input.value.trim();
+                    if(query.length > 2) {
+                        const data = await fetchAPI('/search/multi', `&query=${encodeURIComponent(query)}`);
+                        document.getElementById('mainContent').innerHTML = '';
+                        createRow(`Risultati per: ${query}`, data.results.filter(i => i.poster_path));
+                        state.loadedGenreIndex = 99;
+                    } else if(query.length === 0) switchTab(state.type);
+                }, 500);
+            });
+        }
+
+        // --- CONTINUA A GUARDARE ---
+        function renderContinueWatching() {
+            if(state.continueWatching.length > 0) {
+                createRow("Continua a guardare", state.continueWatching, false, true);
+            }
+        }
+
+        // --- CATEGORIE E DOOMSCROLLING ---
         async function loadGenresBar() {
             const data = await fetchAPI(`/genre/${state.type}/list`);
             state.genres = data.genres;
@@ -201,8 +234,8 @@
             document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
             event.target.classList.add('active');
             const data = await fetchAPI(`/discover/${state.type}`, `&with_genres=${id}`);
-            createRow(`I migliori titoli: ${name}`, data.results);
-            state.loadedGenreIndex = state.genres.length; 
+            createRow(`I migliori: ${name}`, data.results);
+            state.loadedGenreIndex = 99;
         }
 
         async function loadMoreRows() {
@@ -217,65 +250,154 @@
             state.isLoading = false;
         }
 
-        function setupInfiniteScroll() {
-            window.onscroll = () => {
-                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
-                    loadMoreRows();
-                }
-                const header = document.getElementById('header');
-                if(window.scrollY > 50) header.classList.add('scrolled');
-                else header.classList.remove('scrolled');
-            };
-        }
-
-        function createRow(title, items, isTop10 = false) {
+        function createRow(title, items, isTop10 = false, isCW = false) {
             const section = document.createElement('div');
             section.className = 'content-section';
             section.innerHTML = `<h3 class="row-header">${title}</h3>`;
-            
             const wrapper = document.createElement('div');
             wrapper.className = 'row-wrapper';
-
             const container = document.createElement('div');
             container.className = 'row-container';
-
-            const btnLeft = document.createElement('button');
-            btnLeft.className = 'scroll-arrow arrow-left';
-            btnLeft.innerHTML = '<i class="fas fa-chevron-left"></i>';
-            btnLeft.onclick = () => container.scrollBy({ left: -window.innerWidth * 0.8, behavior: 'smooth' });
-
-            const btnRight = document.createElement('button');
-            btnRight.className = 'scroll-arrow arrow-right';
-            btnRight.innerHTML = '<i class="fas fa-chevron-right"></i>';
-            btnRight.onclick = () => container.scrollBy({ left: window.innerWidth * 0.8, behavior: 'smooth' });
 
             items.forEach((item, index) => {
                 const card = document.createElement('div');
                 card.className = `card ${isTop10 ? 'top10-card' : ''}`;
-                card.innerHTML = `<img src="${IMG_SMALL + item.poster_path}" loading="lazy">`;
+                const poster = item.poster_path || item.backdrop_path;
+                card.innerHTML = `<img src="${IMG_SMALL + poster}" loading="lazy">`;
                 
-                if (isTop10) {
+                if(isCW && item.lastSeen) {
+                    card.innerHTML += `<div class="cw-label"><i class="fas fa-calendar-alt"></i> Visto il ${item.lastSeen}</div>`;
+                }
+                if(isTop10) {
                     const rank = document.createElement('div');
-                    rank.className = 'rank-number';
-                    rank.innerText = index + 1;
+                    rank.className = 'rank-number'; rank.innerText = index + 1;
                     card.appendChild(rank);
                 }
-
                 card.onclick = () => openDetails(item);
                 container.appendChild(card);
             });
 
-            wrapper.append(btnLeft, container, btnRight);
+            const bL = document.createElement('button'); bL.className = 'scroll-arrow arrow-left'; bL.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            bL.onclick = () => container.scrollBy({ left: -window.innerWidth * 0.8, behavior: 'smooth' });
+            const bR = document.createElement('button'); bR.className = 'scroll-arrow arrow-right'; bR.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            bR.onclick = () => container.scrollBy({ left: window.innerWidth * 0.8, behavior: 'smooth' });
+
+            wrapper.append(bL, container, bR);
             section.appendChild(wrapper);
-            document.getElementById('mainContent').appendChild(section);
+            if(isCW) document.getElementById('mainContent').prepend(section);
+            else document.getElementById('mainContent').appendChild(section);
         }
 
+        // --- DETTAGLI, CAST, SIMILI ---
+        async function openDetails(item) {
+            state.modalItem = item;
+            const type = (item.name || item.first_air_date) ? 'tv' : 'movie';
+            
+            document.getElementById('modalTitle').innerText = item.title || item.name;
+            document.getElementById('modalOverview').innerText = item.overview || 'Trama non disponibile.';
+            document.getElementById('modalBackdrop').style.backgroundImage = `url(${IMG_URL + (item.backdrop_path || item.poster_path)})`;
+            document.getElementById('modalMeta').innerText = (item.release_date || item.first_air_date || '').split('-')[0];
+
+            // Cast
+            fetchAPI(`/${type}/${item.id}/credits`).then(data => {
+                document.getElementById('modalCast').innerHTML = data.cast.slice(0, 8).map(c => `
+                    <div class="cast-card">
+                        <img class="cast-img" src="${c.profile_path ? IMG_SMALL + c.profile_path : 'https://via.placeholder.com/60'}">
+                        <span class="cast-name">${c.name}</span>
+                    </div>
+                `).join('');
+            });
+
+            // Simili
+            fetchAPI(`/${type}/${item.id}/similar`).then(data => {
+                document.getElementById('modalSimilar').innerHTML = data.results.slice(0, 6).map(s => `
+                    <div class="similar-item" onclick="closeModal(); setTimeout(()=>openDetails(${JSON.stringify(s).replace(/"/g, '&quot;')}), 300)">
+                        <img src="${IMG_SMALL + s.poster_path}">
+                        <div style="position:absolute; bottom:0; background:rgba(0,0,0,0.7); width:100%; padding:5px; font-size:0.6rem; overflow:hidden; white-space:nowrap;">${s.title || s.name}</div>
+                    </div>
+                `).join('');
+            });
+
+            // Trailer
+            fetchAPI(`/${type}/${item.id}/videos`).then(data => {
+                const trailer = data.results.find(v => v.type === 'Trailer' && v.site === 'YouTube');
+                const btn = document.getElementById('trailerBtn');
+                if(trailer) {
+                    btn.style.display = 'inline-flex';
+                    btn.onclick = () => {
+                        document.getElementById('playerFrame').src = `https://www.youtube.com/embed/${trailer.key}?autoplay=1`;
+                        document.getElementById('videoPlayer').style.display = 'block';
+                    };
+                } else btn.style.display = 'none';
+            });
+
+            const sDiv = document.getElementById('seriesControls');
+            if (type === 'tv') {
+                sDiv.style.display = 'flex';
+                const details = await fetchAPI(`/tv/${item.id}`);
+                const sSelect = document.getElementById('seasonSelect');
+                sSelect.innerHTML = details.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">${s.name}</option>`).join('');
+                await updateEpisodes();
+            } else sDiv.style.display = 'none';
+
+            updateListBtn();
+            document.getElementById('modal').style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            document.getElementById('modal').scrollTop = 0;
+        }
+
+        async function updateEpisodes() {
+            const s = document.getElementById('seasonSelect').value;
+            const data = await fetchAPI(`/tv/${state.modalItem.id}/season/${s}`);
+            document.getElementById('episodeSelect').innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Ep. ${e.episode_number}: ${e.name}</option>`).join('');
+        }
+
+        // --- PLAYER E SALVATAGGIO ---
+        function playCurrentMedia() {
+            const item = state.modalItem;
+            const isTv = !!item.name || !!item.first_air_date;
+            
+            let url = isTv ? 
+                `https://vixsrc.to/tv/${item.id}/${document.getElementById('seasonSelect').value}/${document.getElementById('episodeSelect').value}?lang=it` :
+                `https://vixsrc.to/movie/${item.id}?lang=it`;
+            
+            document.getElementById('playerFrame').src = url;
+            document.getElementById('videoPlayer').style.display = 'block';
+        }
+
+        function savePlaybackDate() {
+            if (!state.modalItem) return;
+            const now = new Date();
+            const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
+            
+            const entry = {
+                ...state.modalItem,
+                lastSeen: dateStr,
+                lastTs: Date.now()
+            };
+
+            state.continueWatching = state.continueWatching.filter(i => i.id !== entry.id);
+            state.continueWatching.unshift(entry);
+            state.continueWatching = state.continueWatching.slice(0, 10);
+            localStorage.setItem('pezz8_cw', JSON.stringify(state.continueWatching));
+        }
+
+        function closePlayer() {
+            savePlaybackDate(); // Salva solo la data
+            document.getElementById('videoPlayer').style.display = 'none';
+            document.getElementById('playerFrame').src = '';
+            location.reload(); 
+        }
+
+        // --- UTILS ---
         function toggleMyList() {
             const item = state.modalItem;
             if (state.myList[item.id]) {
                 delete state.myList[item.id];
+                showToast("Rimosso dalla lista");
             } else {
                 state.myList[item.id] = item;
+                showToast("Aggiunto alla lista");
             }
             localStorage.setItem('pezz8_mylist', JSON.stringify(state.myList));
             updateListBtn();
@@ -283,29 +405,19 @@
 
         function updateListBtn() {
             const btn = document.getElementById('addToListBtn');
-            if (state.myList[state.modalItem.id]) {
-                btn.innerHTML = '<i class="fas fa-check"></i> Rimuovi dalla Lista';
-                btn.style.color = '#46d369';
-            } else {
-                btn.innerHTML = '<i class="fas fa-plus"></i> La mia Lista';
-                btn.style.color = '#fff';
-            }
+            btn.innerHTML = state.myList[state.modalItem.id] ? '<i class="fas fa-check"></i> In Lista' : '<i class="fas fa-plus"></i> Lista';
         }
 
-        function loadMyListTab() {
-            const items = Object.values(state.myList);
-            document.getElementById('mainContent').innerHTML = '';
-            if(!items.length) {
-                document.getElementById('mainContent').innerHTML = '<p style="text-align:center; padding:100px;">La tua lista è vuota.</p>';
-            } else {
-                createRow('I miei Preferiti', items);
-            }
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.innerText = msg; t.style.display = 'block';
+            setTimeout(() => t.style.display = 'none', 3000);
         }
 
         async function loadHero() {
             const data = await fetchAPI(`/${state.type}/popular`);
             const item = data.results[0];
-            document.getElementById('hero').style.backgroundImage = `url(${IMG_URL}${item.backdrop_path})`;
+            document.getElementById('hero').style.backgroundImage = `url(${IMG_URL + item.backdrop_path})`;
             document.getElementById('heroTitle').innerText = item.title || item.name;
             document.getElementById('heroOverview').innerText = item.overview;
             document.getElementById('heroPlayBtn').onclick = () => openDetails(item);
@@ -314,70 +426,33 @@
 
         async function loadTop10() {
             const data = await fetchAPI(`/trending/${state.type}/week`);
-            createRow(`Top 10 ${state.type === 'movie' ? 'Film' : 'Serie TV'} in Italia`, data.results.slice(0, 10), true);
-        }
-
-        async function openDetails(item) {
-            state.modalItem = item;
-            document.getElementById('modalTitle').innerText = item.title || item.name;
-            document.getElementById('modalOverview').innerText = item.overview || 'Trama non disponibile.';
-            document.getElementById('modalBackdrop').style.backgroundImage = `url(${IMG_URL}${item.backdrop_path})`;
-            
-            const isTv = !!item.name;
-            const sDiv = document.getElementById('seriesControls');
-            if (isTv) {
-                sDiv.style.display = 'flex';
-                const details = await fetchAPI(`/tv/${item.id}`);
-                const sSelect = document.getElementById('seasonSelect');
-                sSelect.innerHTML = details.seasons
-                    .filter(s => s.season_number > 0)
-                    .map(s => `<option value="${s.season_number}">${s.name}</option>`).join('');
-                await updateEpisodes();
-            } else {
-                sDiv.style.display = 'none';
-            }
-
-            updateListBtn();
-            document.getElementById('modal').style.display = 'block';
-            document.body.style.overflow = 'hidden';
-        }
-
-        // AGGIORNAMENTO: Titoli degli episodi inclusi nella selezione
-        async function updateEpisodes() {
-            const s = document.getElementById('seasonSelect').value;
-            const epSelect = document.getElementById('episodeSelect');
-            epSelect.innerHTML = '<option>Caricamento...</option>';
-            try {
-                const data = await fetchAPI(`/tv/${state.modalItem.id}/season/${s}`);
-                epSelect.innerHTML = data.episodes.map(e => 
-                    `<option value="${e.episode_number}">Ep. ${e.episode_number}: ${e.name}</option>`
-                ).join('');
-            } catch(e) {
-                epSelect.innerHTML = '<option>Errore caricamento</option>';
-            }
-        }
-
-        function playCurrentMedia() {
-            const item = state.modalItem;
-            const isTv = !!item.name;
-            let url = isTv ? 
-                `https://vixsrc.to/tv/${item.id}/${document.getElementById('seasonSelect').value}/${document.getElementById('episodeSelect').value}?lang=it` :
-                `https://vixsrc.to/movie/${item.id}?lang=it`;
-            document.getElementById('playerFrame').src = url;
-            document.getElementById('videoPlayer').style.display = 'block';
+            createRow(`Top 10 in Italia`, data.results.slice(0, 10), true);
         }
 
         function switchTab(type) {
-            state.type = type;
-            state.loadedGenreIndex = 0;
-            document.querySelectorAll('.nav-tab').forEach(t => t.style.borderBottom = "none");
-            document.getElementById(`tab-${type}`).style.borderBottom = "3px solid red";
+            state.type = type; state.loadedGenreIndex = 0;
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(`tab-${type}`).classList.add('active');
             document.getElementById('mainContent').innerHTML = '';
             init();
         }
 
+        function loadMyListTab() {
+            document.getElementById('mainContent').innerHTML = '';
+            const items = Object.values(state.myList);
+            if(items.length) createRow('La mia Lista', items);
+            else document.getElementById('mainContent').innerHTML = '<p style="text-align:center; padding:100px;">Lista vuota.</p>';
+        }
+
+        function setupInfiniteScroll() {
+            window.onscroll = () => {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) loadMoreRows();
+                const h = document.getElementById('header');
+                if(window.scrollY > 50) h.classList.add('scrolled'); else h.classList.remove('scrolled');
+            };
+        }
+
         function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
-        function closePlayer() { document.getElementById('videoPlayer').style.display = 'none'; document.getElementById('playerFrame').src = ''; }
     </script>
 </body>
 </html>
