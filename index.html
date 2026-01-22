@@ -18,76 +18,76 @@
         }
 
         /* --- HEADER --- */
-        .header { position: fixed; top: 0; width: 100%; padding: 20px 4%; background: linear-gradient(180deg, rgba(0,0,0,0.7) 10%, transparent); display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.3s; }
+        .header { position: fixed; top: 0; width: 100%; padding: 20px 4%; background: linear-gradient(180deg, rgba(0,0,0,0.8) 10%, transparent); display: flex; justify-content: space-between; align-items: center; z-index: 1000; transition: 0.3s; }
         .header.scrolled { background-color: #141414; }
-        .logo { font-size: 25px; font-weight: bold; color: var(--primary); text-transform: uppercase; cursor: pointer; letter-spacing: 1px; }
+        .logo { font-size: 28px; font-weight: bold; color: var(--primary); text-transform: uppercase; cursor: pointer; letter-spacing: 2px; }
         
-        /* SEARCH FIX */
-        .search-container { display: flex; gap: 10px; background: rgba(0,0,0,0.75); border: 1px solid #fff; padding: 5px 10px; border-radius: 4px; align-items: center; }
-        .search-input { background: transparent; border: none; color: #fff; outline: none; width: 200px; font-size: 1rem; }
-        .search-icon { cursor: pointer; padding: 5px; color: #fff; transition: 0.2s; }
-        .search-icon:hover { color: var(--primary); transform: scale(1.1); }
+        .search-container { display: flex; gap: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.3); padding: 5px 15px; border-radius: 4px; align-items: center; }
+        .search-input { background: transparent; border: none; color: #fff; outline: none; width: 180px; font-size: 0.9rem; }
+
+        /* --- CATEGORIES (OLD STYLE) --- */
+        .genres-bar { display: flex; gap: 12px; padding: 20px 4%; overflow-x: auto; scrollbar-width: none; margin-top: 10px; }
+        .genres-bar::-webkit-scrollbar { display: none; }
+        .genre-pill { padding: 8px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3); border-radius: 20px; cursor: pointer; white-space: nowrap; transition: 0.3s; font-size: 0.9rem; }
+        .genre-pill:hover, .genre-pill.active { background: #fff; color: #000; }
 
         /* --- HERO --- */
-        .hero { height: 80vh; position: relative; background-size: cover; background-position: center; display: flex; align-items: center; padding: 0 4%; margin-top: -80px; }
-        .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 60%); }
-        .hero::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to top, var(--dark), transparent); }
-        .hero-content { position: relative; z-index: 10; max-width: 650px; margin-top: 80px; }
-        .hero-title { font-size: 3.5rem; margin-bottom: 20px; font-weight: 800; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); line-height: 1.1; }
-        .hero-overview { font-size: 1.2rem; margin-bottom: 25px; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); line-height: 1.5; color: #fff; }
-        .btn { padding: 12px 30px; border-radius: 4px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-right: 15px; transition: transform 0.2s; }
-        .btn:hover { transform: scale(1.05); }
+        .hero { height: 75vh; position: relative; background-size: cover; background-position: center; display: flex; align-items: center; padding: 0 4%; margin-top: -80px; }
+        .hero::before { content: ''; position: absolute; inset: 0; background: linear-gradient(to right, rgba(0,0,0,0.8) 0%, transparent 70%); }
+        .hero::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 200px; background: linear-gradient(to top, var(--dark), transparent); }
+        .hero-content { position: relative; z-index: 10; max-width: 600px; }
+        .hero-title { font-size: 3.5rem; margin-bottom: 15px; font-weight: 800; line-height: 1.1; }
+        .hero-overview { font-size: 1.1rem; margin-bottom: 25px; color: #eee; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* --- BUTTONS --- */
+        .btn { padding: 12px 25px; border-radius: 4px; border: none; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-right: 12px; display: inline-flex; align-items: center; gap: 10px; transition: 0.2s; }
         .btn-play { background: #fff; color: #000; }
-        .btn-info { background: rgba(109,109,110,0.7); color: #fff; backdrop-filter: blur(5px); }
+        .btn-info { background: rgba(109,109,110,0.7); color: #fff; backdrop-filter: blur(10px); }
 
-        /* --- NAVIGATION --- */
-        .nav-tabs { display: flex; justify-content: center; gap: 40px; margin: 10px 0 30px 0; position: relative; z-index: 100; }
-        .nav-tab { cursor: pointer; color: var(--gray); font-size: 1.1rem; font-weight: 500; transition: 0.3s; padding: 10px; }
-        .nav-tab.active, .nav-tab:hover { color: #fff; font-weight: bold; }
-        .nav-tab.active { border-bottom: 3px solid var(--primary); }
-        .genres { display: flex; gap: 12px; padding: 0 4%; overflow-x: auto; padding-bottom: 20px; scrollbar-width: none; }
-        .genre-pill { padding: 6px 18px; border: 1px solid #808080; background: rgba(0,0,0,0.3); border-radius: 20px; white-space: nowrap; cursor: pointer; font-size: 0.9rem; transition: 0.2s; }
-        .genre-pill.active, .genre-pill:hover { background: #fff; color: #000; border-color: #fff; }
+        /* --- ROWS & ARROWS --- */
+        .content-section { padding: 20px 0; position: relative; overflow: visible; }
+        .row-header { font-size: 1.4rem; margin-left: 4%; margin-bottom: 10px; color: #e5e5e5; font-weight: 600; }
+        .row-wrapper { position: relative; padding: 0 4%; }
+        .row-container { 
+            display: flex; 
+            gap: 10px; 
+            overflow-x: hidden;
+            overflow-y: hidden;
+            scroll-behavior: smooth;
+            padding: 20px 0;
+        }
 
-        /* --- CONTENT ROWS --- */
-        .content-section { padding: 30px 0; padding-left: 4%; overflow: visible; }
-        .row-header { font-size: 1.5rem; margin-bottom: 15px; color: #e5e5e5; font-weight: 600; letter-spacing: 0.5px; }
-        .row-container { display: flex; gap: 10px; overflow-x: auto; padding: 40px 0; margin-top: -40px; padding-right: 4%; scroll-behavior: smooth; }
-        .row-container::-webkit-scrollbar { display: none; }
-        
-        .card { flex: 0 0 auto; width: 200px; height: 300px; border-radius: 4px; position: relative; cursor: pointer; transition: all 0.3s ease-in-out; background: #222; }
-        .card:hover { transform: scale(1.2); z-index: 100; box-shadow: 0 10px 20px rgba(0,0,0,0.7); border-radius: 6px; }
+        .scroll-arrow {
+            position: absolute; top: 0; bottom: 0; width: 4%; background: rgba(0,0,0,0.5); color: white; border: none; cursor: pointer; z-index: 100; opacity: 0; transition: 0.3s; font-size: 2rem;
+        }
+        .row-wrapper:hover .scroll-arrow { opacity: 1; }
+        .arrow-left { left: 0; } .arrow-right { right: 0; }
+
+        .card { flex: 0 0 auto; width: 200px; aspect-ratio: 2/3; border-radius: 4px; position: relative; cursor: pointer; transition: transform 0.3s; background: #222; }
+        .card:hover { transform: scale(1.1); z-index: 10; }
         .card img { width: 100%; height: 100%; object-fit: cover; border-radius: 4px; }
-        .card-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: linear-gradient(to top, #141414 10%, rgba(20,20,20,0.9) 50%, transparent 100%); padding: 15px 10px 10px 10px; opacity: 0; transition: opacity 0.3s ease; border-bottom-left-radius: 6px; border-bottom-right-radius: 6px; display: flex; flex-direction: column; gap: 8px; }
-        .card:hover .card-overlay { opacity: 1; }
-        .card-btns { display: flex; gap: 10px; align-items: center; margin-bottom: 5px; }
-        .mini-btn { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.7); background: rgba(40,40,40,0.6); color: #fff; display: flex; justify-content: center; align-items: center; font-size: 12px; transition: 0.2s; }
-        .mini-btn:hover { background: #fff; color: #000; border-color: #fff; }
-        .mini-btn.play { background: #fff; color: #000; border-color: #fff; }
-        .card-info-title { font-size: 13px; font-weight: bold; text-shadow: 1px 1px 2px #000; }
-        .card-meta { font-size: 10px; color: #46d369; font-weight: 700; display: flex; gap: 8px; align-items: center; }
-        .card-meta span.hd { border: 1px solid #aaa; padding: 0 4px; border-radius: 2px; color: #aaa; font-weight: normal; }
+
+        /* --- TOP 10 --- */
+        .top10-card { width: 230px; margin-left: 50px; overflow: visible; }
+        .rank-number {
+            position: absolute;
+            left: -60px;
+            bottom: -20px;
+            font-size: 160px;
+            font-weight: 900;
+            color: var(--dark);
+            -webkit-text-stroke: 3px #777;
+            z-index: 1;
+            line-height: 1;
+            pointer-events: none;
+        }
 
         /* --- MODAL --- */
-        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 2000; overflow-y: auto; backdrop-filter: blur(8px); }
-        .modal-box { background: #181818; width: 90%; max-width: 850px; margin: 50px auto; border-radius: 10px; position: relative; padding-bottom: 40px; box-shadow: 0 0 50px rgba(0,0,0,0.5); overflow: hidden; }
-        .modal-close { position: absolute; top: 15px; right: 15px; background: #181818; color: #fff; border: none; font-size: 24px; cursor: pointer; z-index: 20; width: 40px; height: 40px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-        .modal-close:hover { background: #333; }
-        .modal-hero { height: 450px; background-size: cover; background-position: center; position: relative; }
-        .modal-hero::after { content:''; position: absolute; inset: 0; background: linear-gradient(to top, #181818, transparent); }
-        .modal-info { padding: 0 40px; margin-top: -50px; position: relative; z-index: 10; }
-        .modal-title { font-size: 3rem; font-weight: 800; margin-bottom: 10px; }
-        .modal-meta-row { display: flex; gap: 15px; color: #46d369; font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; align-items: center; }
-        .modal-overview { font-size: 1.1rem; line-height: 1.6; color: #d2d2d2; margin-bottom: 30px; max-width: 80%; }
-        
+        .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 2000; overflow-y: auto; }
+        .modal-box { background: #181818; width: 90%; max-width: 850px; margin: 40px auto; border-radius: 10px; overflow: hidden; position: relative; }
+
         .video-player { display: none; position: fixed; inset: 0; background: #000; z-index: 3000; }
         .video-player iframe { width: 100%; height: 100%; border: none; }
-        .close-player { position: absolute; top: 30px; right: 30px; background: transparent; color: #fff; border: 2px solid #fff; padding: 10px 25px; cursor: pointer; z-index: 3001; font-weight: bold; border-radius: 4px; font-size: 1rem; }
-        .close-player:hover { background: #fff; color: #000; }
-        
-        /* Utils */
-        .error-msg { color: #e50914; padding: 20px; text-align: center; margin-top: 50px; font-size: 1.2rem; }
-        .loading-msg { color: #fff; padding: 40px; text-align: center; font-size: 1.5rem; opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -95,15 +95,15 @@
     <header class="header" id="header">
         <div class="logo" onclick="location.reload()">PEZZ8</div>
         <div class="search-container">
-            <input type="text" class="search-input" id="searchInput" placeholder="Titoli, persone, generi">
-            <i class="fas fa-search search-icon" onclick="executeSearch()"></i>
+            <i class="fas fa-search"></i>
+            <input type="text" class="search-input" id="searchInput" placeholder="Titoli, generi...">
         </div>
     </header>
 
     <div class="hero" id="hero">
         <div class="hero-content">
-            <h1 class="hero-title" id="heroTitle">Caricamento...</h1>
-            <p class="hero-overview" id="heroOverview">Scegli una categoria o cerca un film.</p>
+            <h1 class="hero-title" id="heroTitle"></h1>
+            <p class="hero-overview" id="heroOverview"></p>
             <div class="hero-buttons">
                 <button class="btn btn-play" id="heroPlayBtn"><i class="fas fa-play"></i> Riproduci</button>
                 <button class="btn btn-info" id="heroInfoBtn"><i class="fas fa-info-circle"></i> Altre Info</button>
@@ -111,45 +111,49 @@
         </div>
     </div>
 
-    <div class="nav-tabs">
-        <div class="nav-tab active" id="tab-movie" onclick="switchTab('movie')">Film</div>
-        <div class="nav-tab" id="tab-tv" onclick="switchTab('tv')">Serie TV</div>
-        <div class="nav-tab" id="tab-list" onclick="loadMyList()">La mia Lista</div>
+    <div class="nav-tabs" style="display:flex; justify-content:center; gap:30px; margin: 20px 0;">
+        <div class="nav-tab active" id="tab-movie" onclick="switchTab('movie')" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">Film</div>
+        <div class="nav-tab" id="tab-tv" onclick="switchTab('tv')" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">Serie TV</div>
+        <div class="nav-tab" id="tab-list" onclick="loadMyListTab()" style="cursor:pointer; font-weight:bold; padding-bottom:5px;">La mia Lista</div>
     </div>
 
-    <div class="genres" id="genreFilters"></div>
+    <div class="genres-bar" id="genreFilters"></div>
+
     <div id="mainContent"></div>
-
-    <div class="video-player" id="videoPlayer">
-        <button class="close-player" onclick="closePlayer()">CHIUDI PLAYER</button>
-        <iframe id="playerFrame" allowfullscreen></iframe>
-    </div>
+    <div id="infiniteLoader" style="text-align:center; padding:40px; color:#666;">Caricamento suggerimenti...</div>
 
     <div class="modal" id="modal">
         <div class="modal-box">
-            <button class="modal-close" onclick="closeModal()">×</button>
-            <div class="modal-hero" id="modalBackdrop"></div>
-            <div class="modal-info">
-                <h2 id="modalTitle" class="modal-title"></h2>
-                <div id="modalMeta" class="modal-meta-row"></div>
+            <div id="modalBackdrop" style="height:450px; background-size:cover; background-position:center; position:relative;">
+                <button onclick="closeModal()" style="position:absolute; right:20px; top:20px; background:rgba(0,0,0,0.6); border:none; color:#fff; font-size:2rem; cursor:pointer; width:45px; height:45px; border-radius:50%; z-index:10;">&times;</button>
+            </div>
+            <div style="padding: 40px; margin-top: -60px; position: relative; background: linear-gradient(to top, #181818 85%, transparent);">
+                <h2 id="modalTitle" style="font-size:3rem; margin-bottom:15px;"></h2>
                 
-                <div id="seriesControls" style="display:none; margin-bottom:20px; background:#222; padding:15px; border-radius:5px; border: 1px solid #333;">
-                    <div style="margin-bottom:10px; color:#aaa; font-size:0.9rem;">
-                        <i class="fas fa-history"></i> Ultimo visto: <span id="lastWatchedLabel" style="color:#fff; font-weight:bold;">Mai visto</span>
+                <div id="seriesControls" style="display:none; margin-bottom:20px; background:#252525; padding:15px; border-radius:8px; display: flex; gap: 10px; align-items: center;">
+                    <div style="flex: 1;">
+                        <label style="font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 5px;">Stagione</label>
+                        <select id="seasonSelect" onchange="updateEpisodes()" style="width: 100%; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
                     </div>
-                    <label style="color:#ccc; margin-right: 10px;">Stagione:</label>
-                    <select id="seasonSelect" onchange="updateEpisodes()" style="padding:8px; background:#444; color:#fff; border:none; border-radius:4px; margin-right:15px;"></select>
-                    <select id="episodeSelect" style="padding:8px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
+                    <div style="flex: 2;">
+                        <label style="font-size: 0.8rem; color: #aaa; display: block; margin-bottom: 5px;">Episodio</label>
+                        <select id="episodeSelect" style="width: 100%; padding:10px; background:#444; color:#fff; border:none; border-radius:4px;"></select>
+                    </div>
                 </div>
 
-                <p id="modalOverview" class="modal-overview"></p>
+                <p id="modalOverview" style="font-size:1.1rem; color:#d2d2d2; margin-bottom:30px; max-width: 80%;"></p>
                 
-                <div style="display: flex; gap: 15px;">
-                    <button id="mainPlayBtn" class="btn btn-play" onclick="playCurrentMedia()"><i class="fas fa-play"></i> Riproduci</button>
-                    <button class="btn btn-info" id="modalListBtn" onclick="toggleMyList()"><i class="fas fa-plus"></i> La mia Lista</button>
+                <div style="display:flex; gap:15px;">
+                    <button class="btn btn-play" onclick="playCurrentMedia()"><i class="fas fa-play"></i> Guarda Ora</button>
+                    <button class="btn btn-info" id="addToListBtn" onclick="toggleMyList()"><i class="fas fa-plus"></i> La mia Lista</button>
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="video-player" id="videoPlayer">
+        <button onclick="closePlayer()" style="position:absolute; top:30px; right:30px; background:#fff; padding:10px 20px; font-weight:bold; cursor:pointer; border:none; z-index: 3002;">CHIUDI</button>
+        <iframe id="playerFrame" allowfullscreen></iframe>
     </div>
 
     <script>
@@ -160,314 +164,220 @@
 
         let state = {
             type: 'movie',
+            genres: [],
+            loadedGenreIndex: 0,
+            isLoading: false,
             modalItem: null,
-            myList: JSON.parse(localStorage.getItem('netflics_list')) || {},
-            continueWatching: JSON.parse(localStorage.getItem('netflics_cw')) || {}
+            myList: JSON.parse(localStorage.getItem('pezz8_mylist')) || {}
         };
 
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('header');
-            if(window.scrollY > 50) header.classList.add('scrolled');
-            else header.classList.remove('scrolled');
-        });
+        window.onload = init;
 
-        // Init
-        initContent();
-
-        // --- GESTIONE RICERCA (FIXED) ---
-        const searchInput = document.getElementById('searchInput');
-
-        // Ascolta il tasto Invio
-        searchInput.addEventListener('keyup', (e) => {
-            if (e.key === 'Enter') {
-                executeSearch();
-            }
-        });
-
-        async function executeSearch() {
-            const query = searchInput.value.trim();
-            
-            // Se vuoto, ricarica la home
-            if(!query) {
-                switchTab(state.type);
-                return;
-            }
-
-            const content = document.getElementById('mainContent');
-            content.innerHTML = '<div class="loading-msg">Ricerca in corso...</div>';
-
-            try {
-                // Cerca sia Film che Serie TV
-                const movies = await fetchAPI(`/search/movie?query=${encodeURIComponent(query)}`);
-                const tv = await fetchAPI(`/search/tv?query=${encodeURIComponent(query)}`);
-                
-                content.innerHTML = ''; // Pulisce il loader
-
-                let foundAny = false;
-
-                if(movies && movies.results && movies.results.length > 0) {
-                    createRow('Film Trovati', movies.results);
-                    foundAny = true;
-                }
-
-                if(tv && tv.results && tv.results.length > 0) {
-                    createRow('Serie TV Trovate', tv.results);
-                    foundAny = true;
-                }
-
-                if(!foundAny) {
-                    content.innerHTML = '<div class="error-msg">Nessun risultato trovato per "' + query + '"</div>';
-                }
-
-            } catch(e) {
-                console.error(e);
-                content.innerHTML = '<div class="error-msg">Errore durante la ricerca. Riprova.</div>';
-            }
+        async function init() {
+            await loadHero();
+            await loadTop10();
+            await loadGenresBar();
+            await loadMoreRows();
+            setupInfiniteScroll();
         }
 
-        // --- CORE FUNCTIONS ---
-        function switchTab(type) {
-            state.type = type;
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(`tab-${type}`).classList.add('active');
-            // Reset ricerca se si cambia tab
-            document.getElementById('searchInput').value = '';
-            initContent();
-        }
-
-        function loadMyList() {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById('tab-list').classList.add('active');
-            
-            const list = Object.values(state.myList);
-            document.getElementById('mainContent').innerHTML = '';
-            
-            if(list.length === 0) {
-                document.getElementById('mainContent').innerHTML = '<div style="text-align:center; padding:60px; color:#aaa; font-size:1.2rem;">La tua lista è vuota.</div>';
-            } else {
-                createRow('I miei Preferiti', list);
-            }
-        }
-
-        async function initContent() {
-            try {
-                await loadGenres();
-                await loadHero();
-                await loadRows();
-            } catch (error) {
-                console.error(error);
-                document.getElementById('mainContent').innerHTML = `<div class="error-msg">Errore di connessione API. Controlla la chiave.</div>`;
-            }
-        }
-
-        async function fetchAPI(endpoint) {
-            const res = await fetch(`${BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${API_KEY}&language=it-IT`);
-            if(!res.ok) throw new Error('API Error');
+        async function fetchAPI(endpoint, params = '') {
+            const res = await fetch(`${BASE_URL}${endpoint}?api_key=${API_KEY}&language=it-IT&region=IT${params}`);
             return await res.json();
         }
 
-        async function loadGenres() {
+        async function loadGenresBar() {
             const data = await fetchAPI(`/genre/${state.type}/list`);
-            const div = document.getElementById('genreFilters');
-            if(data && data.genres) {
-                div.innerHTML = `<span class="genre-pill active" onclick="initContent()">Tutti</span>` + 
-                data.genres.map(g => `<span class="genre-pill" onclick="filterGenre(${g.id})">${g.name}</span>`).join('');
+            state.genres = data.genres;
+            const bar = document.getElementById('genreFilters');
+            bar.innerHTML = `<span class="genre-pill active" onclick="switchTab('${state.type}')">Tutti</span>`;
+            data.genres.forEach(g => {
+                bar.innerHTML += `<span class="genre-pill" onclick="filterByGenre(${g.id}, '${g.name}')">${g.name}</span>`;
+            });
+        }
+
+        async function filterByGenre(id, name) {
+            document.getElementById('mainContent').innerHTML = '';
+            document.querySelectorAll('.genre-pill').forEach(p => p.classList.remove('active'));
+            event.target.classList.add('active');
+            const data = await fetchAPI(`/discover/${state.type}`, `&with_genres=${id}`);
+            createRow(`I migliori titoli: ${name}`, data.results);
+            state.loadedGenreIndex = state.genres.length; 
+        }
+
+        async function loadMoreRows() {
+            if (state.isLoading || state.loadedGenreIndex >= state.genres.length) return;
+            state.isLoading = true;
+            const genresToLoad = state.genres.slice(state.loadedGenreIndex, state.loadedGenreIndex + 2);
+            for (const g of genresToLoad) {
+                const data = await fetchAPI(`/discover/${state.type}`, `&with_genres=${g.id}`);
+                if(data.results.length) createRow(g.name, data.results);
+            }
+            state.loadedGenreIndex += 2;
+            state.isLoading = false;
+        }
+
+        function setupInfiniteScroll() {
+            window.onscroll = () => {
+                if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight - 800) {
+                    loadMoreRows();
+                }
+                const header = document.getElementById('header');
+                if(window.scrollY > 50) header.classList.add('scrolled');
+                else header.classList.remove('scrolled');
+            };
+        }
+
+        function createRow(title, items, isTop10 = false) {
+            const section = document.createElement('div');
+            section.className = 'content-section';
+            section.innerHTML = `<h3 class="row-header">${title}</h3>`;
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = 'row-wrapper';
+
+            const container = document.createElement('div');
+            container.className = 'row-container';
+
+            const btnLeft = document.createElement('button');
+            btnLeft.className = 'scroll-arrow arrow-left';
+            btnLeft.innerHTML = '<i class="fas fa-chevron-left"></i>';
+            btnLeft.onclick = () => container.scrollBy({ left: -window.innerWidth * 0.8, behavior: 'smooth' });
+
+            const btnRight = document.createElement('button');
+            btnRight.className = 'scroll-arrow arrow-right';
+            btnRight.innerHTML = '<i class="fas fa-chevron-right"></i>';
+            btnRight.onclick = () => container.scrollBy({ left: window.innerWidth * 0.8, behavior: 'smooth' });
+
+            items.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = `card ${isTop10 ? 'top10-card' : ''}`;
+                card.innerHTML = `<img src="${IMG_SMALL + item.poster_path}" loading="lazy">`;
+                
+                if (isTop10) {
+                    const rank = document.createElement('div');
+                    rank.className = 'rank-number';
+                    rank.innerText = index + 1;
+                    card.appendChild(rank);
+                }
+
+                card.onclick = () => openDetails(item);
+                container.appendChild(card);
+            });
+
+            wrapper.append(btnLeft, container, btnRight);
+            section.appendChild(wrapper);
+            document.getElementById('mainContent').appendChild(section);
+        }
+
+        function toggleMyList() {
+            const item = state.modalItem;
+            if (state.myList[item.id]) {
+                delete state.myList[item.id];
+            } else {
+                state.myList[item.id] = item;
+            }
+            localStorage.setItem('pezz8_mylist', JSON.stringify(state.myList));
+            updateListBtn();
+        }
+
+        function updateListBtn() {
+            const btn = document.getElementById('addToListBtn');
+            if (state.myList[state.modalItem.id]) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Rimuovi dalla Lista';
+                btn.style.color = '#46d369';
+            } else {
+                btn.innerHTML = '<i class="fas fa-plus"></i> La mia Lista';
+                btn.style.color = '#fff';
             }
         }
 
-        async function filterGenre(id) {
-            const data = await fetchAPI(`/discover/${state.type}?with_genres=${id}`);
+        function loadMyListTab() {
+            const items = Object.values(state.myList);
             document.getElementById('mainContent').innerHTML = '';
-            createRow('Risultati', data.results);
+            if(!items.length) {
+                document.getElementById('mainContent').innerHTML = '<p style="text-align:center; padding:100px;">La tua lista è vuota.</p>';
+            } else {
+                createRow('I miei Preferiti', items);
+            }
         }
 
         async function loadHero() {
             const data = await fetchAPI(`/${state.type}/popular`);
-            if(data.results.length) {
-                const item = data.results[0];
-                document.getElementById('hero').style.backgroundImage = `url(${IMG_URL}${item.backdrop_path})`;
-                document.getElementById('heroTitle').innerText = item.title || item.name;
-                document.getElementById('heroOverview').innerText = item.overview;
-                document.getElementById('heroPlayBtn').onclick = () => openDetails(item, true);
-                document.getElementById('heroInfoBtn').onclick = () => openDetails(item);
-            }
+            const item = data.results[0];
+            document.getElementById('hero').style.backgroundImage = `url(${IMG_URL}${item.backdrop_path})`;
+            document.getElementById('heroTitle').innerText = item.title || item.name;
+            document.getElementById('heroOverview').innerText = item.overview;
+            document.getElementById('heroPlayBtn').onclick = () => openDetails(item);
+            document.getElementById('heroInfoBtn').onclick = () => openDetails(item);
         }
 
-        async function loadRows() {
-            const content = document.getElementById('mainContent');
-            content.innerHTML = '';
-
-            const cw = Object.values(state.continueWatching).filter(i => i.type === state.type).sort((a,b) => b.timestamp - a.timestamp);
-            if(cw.length) createRow('Continua a guardare', cw);
-
-            const urls = state.type === 'movie' ? 
-                ['/movie/popular', '/movie/top_rated', '/movie/upcoming'] : 
-                ['/tv/popular', '/tv/top_rated', '/tv/on_the_air'];
-            const titles = ['Di Tendenza Ora', 'I Più Votati dalla Critica', 'Nuove Uscite'];
-
-            for(let i=0; i<urls.length; i++) {
-                const data = await fetchAPI(urls[i]);
-                if(data.results) createRow(titles[i], data.results);
-            }
+        async function loadTop10() {
+            const data = await fetchAPI(`/trending/${state.type}/week`);
+            createRow(`Top 10 ${state.type === 'movie' ? 'Film' : 'Serie TV'} in Italia`, data.results.slice(0, 10), true);
         }
 
-        function createRow(title, items) {
-            if(!items || !items.length) return;
-            const row = document.createElement('div');
-            row.className = 'content-section';
-            row.innerHTML = `<h3 class="row-header">${title}</h3><div class="row-container"></div>`;
-            
-            const container = row.querySelector('.row-container');
-
-            items.forEach(item => {
-                if(item.poster_path || item.poster) {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    const img = item.poster_path ? IMG_SMALL + item.poster_path : IMG_SMALL + item.poster;
-                    const rating = item.vote_average ? Math.round(item.vote_average * 10) : '90';
-                    
-                    card.innerHTML = `
-                        <img src="${img}" loading="lazy">
-                        <div class="card-overlay">
-                            <div class="card-btns">
-                                <div class="mini-btn play"><i class="fas fa-play"></i></div>
-                                <div class="mini-btn"><i class="fas fa-plus"></i></div>
-                                <div class="mini-btn" style="margin-left:auto;"><i class="fas fa-chevron-down"></i></div>
-                            </div>
-                            <div class="card-info-title">${item.title || item.name}</div>
-                            <div class="card-meta">
-                                <span>${rating}% Match</span>
-                                <span class="hd">HD</span>
-                            </div>
-                        </div>
-                    `;
-                    
-                    card.onclick = () => openDetails(item);
-                    container.appendChild(card);
-                }
-            });
-            document.getElementById('mainContent').appendChild(row);
-        }
-
-        // Details & Modal
-        async function openDetails(item, autoplay = false) {
+        async function openDetails(item) {
             state.modalItem = item;
-            const type = item.name || state.type === 'tv' ? 'tv' : 'movie';
+            document.getElementById('modalTitle').innerText = item.title || item.name;
+            document.getElementById('modalOverview').innerText = item.overview || 'Trama non disponibile.';
+            document.getElementById('modalBackdrop').style.backgroundImage = `url(${IMG_URL}${item.backdrop_path})`;
             
-            let details = item;
-            try { details = await fetchAPI(`/${type}/${item.id}`); } catch(e){}
-
-            document.getElementById('modalTitle').innerText = details.title || details.name;
-            document.getElementById('modalOverview').innerText = details.overview || 'Nessuna descrizione.';
-            
-            const backdrop = details.backdrop_path ? `${IMG_URL}${details.backdrop_path}` : '';
-            document.getElementById('modalBackdrop').style.backgroundImage = `url(${backdrop})`;
-            
-            const year = (details.release_date || details.first_air_date || '').split('-')[0];
-            const runtime = details.runtime ? `${details.runtime} min` : (details.number_of_seasons ? `${details.number_of_seasons} Stagioni` : '');
-            
-            document.getElementById('modalMeta').innerHTML = `
-                <span>${year}</span>
-                <span style="border:1px solid #666; padding:0 5px; color:#ddd; font-size:0.9rem">HD</span>
-                <span>${runtime}</span>
-            `;
-
-            const btn = document.getElementById('modalListBtn');
-            btn.innerHTML = state.myList[item.id] ? '<i class="fas fa-check"></i> Rimuovi' : '<i class="fas fa-plus"></i> La mia Lista';
-
-            document.getElementById('mainPlayBtn').innerHTML = '<i class="fas fa-play"></i> Riproduci';
-
+            const isTv = !!item.name;
             const sDiv = document.getElementById('seriesControls');
-            const lastWatched = state.continueWatching[item.id];
-
-            if(type === 'tv') {
-                sDiv.style.display = 'block';
+            if (isTv) {
+                sDiv.style.display = 'flex';
+                const details = await fetchAPI(`/tv/${item.id}`);
                 const sSelect = document.getElementById('seasonSelect');
-                sSelect.innerHTML = '';
-                
-                const seasons = details.seasons || [{season_number:1, name:'Stagione 1'}];
-                seasons.forEach(s => {
-                    if(s.season_number > 0) sSelect.innerHTML += `<option value="${s.season_number}">${s.name}</option>`;
-                });
-                
-                if (lastWatched && lastWatched.season) {
-                    sSelect.value = lastWatched.season;
-                    document.getElementById('lastWatchedLabel').innerText = `S${lastWatched.season}:E${lastWatched.episode}`;
-                    document.getElementById('mainPlayBtn').innerHTML = `<i class="fas fa-play"></i> Riprendi S${lastWatched.season}:E${lastWatched.episode}`;
-                } else {
-                    document.getElementById('lastWatchedLabel').innerText = "Mai visto";
-                }
-
-                await updateEpisodes(lastWatched ? lastWatched.episode : 1);
-
+                sSelect.innerHTML = details.seasons
+                    .filter(s => s.season_number > 0)
+                    .map(s => `<option value="${s.season_number}">${s.name}</option>`).join('');
+                await updateEpisodes();
             } else {
                 sDiv.style.display = 'none';
-                if(lastWatched) {
-                    document.getElementById('mainPlayBtn').innerHTML = `<i class="fas fa-play"></i> Riprendi Film`;
-                }
             }
 
+            updateListBtn();
             document.getElementById('modal').style.display = 'block';
-            if(autoplay) playCurrentMedia();
+            document.body.style.overflow = 'hidden';
         }
 
-        async function updateEpisodes(targetEpisode = 1) {
+        // AGGIORNAMENTO: Titoli degli episodi inclusi nella selezione
+        async function updateEpisodes() {
             const s = document.getElementById('seasonSelect').value;
             const epSelect = document.getElementById('episodeSelect');
             epSelect.innerHTML = '<option>Caricamento...</option>';
             try {
                 const data = await fetchAPI(`/tv/${state.modalItem.id}/season/${s}`);
-                epSelect.innerHTML = data.episodes.map(e => `<option value="${e.episode_number}">Episodio ${e.episode_number}: ${e.name}</option>`).join('');
-                if(targetEpisode) epSelect.value = targetEpisode;
+                epSelect.innerHTML = data.episodes.map(e => 
+                    `<option value="${e.episode_number}">Ep. ${e.episode_number}: ${e.name}</option>`
+                ).join('');
             } catch(e) {
-                epSelect.innerHTML = '';
-                for(let i=1; i<=20; i++) epSelect.innerHTML += `<option value="${i}">Episodio ${i}</option>`;
+                epSelect.innerHTML = '<option>Errore caricamento</option>';
             }
         }
 
         function playCurrentMedia() {
             const item = state.modalItem;
-            const isTv = document.getElementById('seriesControls').style.display !== 'none';
-            let url = '';
-            let s = null, e = null;
-
-            if(isTv) {
-                s = document.getElementById('seasonSelect').value;
-                e = document.getElementById('episodeSelect').value;
-                url = `https://vixsrc.to/tv/${item.id}/${s}/${e}?lang=it`;
-            } else {
-                url = `https://vixsrc.to/movie/${item.id}?lang=it`;
-            }
-            
-            state.continueWatching[item.id] = { 
-                ...item, 
-                timestamp: Date.now(), 
-                type: isTv ? 'tv' : 'movie', 
-                poster: item.poster_path,
-                season: s,
-                episode: e
-            };
-            localStorage.setItem('netflics_cw', JSON.stringify(state.continueWatching));
-            
+            const isTv = !!item.name;
+            let url = isTv ? 
+                `https://vixsrc.to/tv/${item.id}/${document.getElementById('seasonSelect').value}/${document.getElementById('episodeSelect').value}?lang=it` :
+                `https://vixsrc.to/movie/${item.id}?lang=it`;
             document.getElementById('playerFrame').src = url;
             document.getElementById('videoPlayer').style.display = 'block';
         }
 
-        function closePlayer() {
-            document.getElementById('playerFrame').src = '';
-            document.getElementById('videoPlayer').style.display = 'none';
-            if(document.getElementById('tab-movie').classList.contains('active')) loadRows();
+        function switchTab(type) {
+            state.type = type;
+            state.loadedGenreIndex = 0;
+            document.querySelectorAll('.nav-tab').forEach(t => t.style.borderBottom = "none");
+            document.getElementById(`tab-${type}`).style.borderBottom = "3px solid red";
+            document.getElementById('mainContent').innerHTML = '';
+            init();
         }
 
-        function toggleMyList() {
-            const item = state.modalItem;
-            if(state.myList[item.id]) delete state.myList[item.id];
-            else state.myList[item.id] = item;
-            localStorage.setItem('netflics_list', JSON.stringify(state.myList));
-            document.getElementById('modalListBtn').innerHTML = state.myList[item.id] ? '<i class="fas fa-check"></i> Rimuovi' : '<i class="fas fa-plus"></i> La mia Lista';
-        }
-
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
+        function closeModal() { document.getElementById('modal').style.display = 'none'; document.body.style.overflow = 'auto'; }
+        function closePlayer() { document.getElementById('videoPlayer').style.display = 'none'; document.getElementById('playerFrame').src = ''; }
     </script>
 </body>
 </html>
