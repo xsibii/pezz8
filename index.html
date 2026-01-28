@@ -315,8 +315,13 @@
                 const poster = item.poster_path || item.backdrop_path;
                 card.innerHTML = `<img src="${IMG_SMALL + poster}" loading="lazy">`;
                 
-                if(isCW && item.lastSeen) {
-                    card.innerHTML += `<div class="cw-label"><i class="fas fa-calendar-alt"></i> ${item.lastSeen.slice(0,5)}</div>`;
+                if(isCW) {
+                    // Se ci sono stagione ed episodio, mostra "S1 E5", altrimenti la data
+                    let labelText = `<i class="fas fa-calendar-alt"></i> ${item.lastSeen.slice(0,5)}`;
+                    if(item.lastSeason && item.lastEpisode) {
+                        labelText = `<i class="fas fa-play"></i> S${item.lastSeason} E${item.lastEpisode}`;
+                    }
+                    card.innerHTML += `<div class="cw-label">${labelText}</div>`;
                 }
                 if(isTop10) {
                     const rank = document.createElement('div');
@@ -387,7 +392,19 @@
                 const details = await fetchAPI(`/tv/${item.id}`);
                 const sSelect = document.getElementById('seasonSelect');
                 sSelect.innerHTML = details.seasons.filter(s => s.season_number > 0).map(s => `<option value="${s.season_number}">${s.name}</option>`).join('');
+        
+                // RECUPERA PROGRESSO: Se esiste un salvataggio, imposta la stagione
+                const saved = state.continueWatching.find(i => i.id === item.id);
+                if (saved && saved.lastSeason) {
+                    sSelect.value = saved.lastSeason;
+                }
+
                 await updateEpisodes();
+        
+                // RECUPERA PROGRESSO: Imposta l'episodio
+                if (saved && saved.lastEpisode) {
+                    document.getElementById('episodeSelect').value = saved.lastEpisode;
+                }
             } else sDiv.style.display = 'none';
 
             updateListBtn();
@@ -418,7 +435,22 @@
             if (!state.modalItem) return;
             const now = new Date();
             const dateStr = `${now.getDate()}/${now.getMonth()+1}/${now.getFullYear()}`;
-            const entry = { ...state.modalItem, lastSeen: dateStr, lastTs: Date.now() };
+    
+            // Controlla se è una serie TV
+            const isTv = !!state.modalItem.name || !!state.modalItem.first_air_date;
+    
+            const entry = { 
+                ...state.modalItem, 
+                lastSeen: dateStr, 
+                lastTs: Date.now() 
+            };
+
+            // Se è una serie, salva i valori dei selettori
+            if (isTv) {
+                entry.lastSeason = document.getElementById('seasonSelect').value;
+                entry.lastEpisode = document.getElementById('episodeSelect').value;
+            }
+
             state.continueWatching = state.continueWatching.filter(i => i.id !== entry.id);
             state.continueWatching.unshift(entry);
             state.continueWatching = state.continueWatching.slice(0, 10);
