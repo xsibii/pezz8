@@ -1093,17 +1093,17 @@
         // ============== PROGRESSO GRANULARE + EPISODIO SUCCESSIVO ==============
         // Nota: i player devono inviare eventi postMessage (currentTime/duration/event) per funzionare
         // appieno. Se il player non li invia, l'app ricade comunque sul salvataggio base (stagione/episodio).
+        function normalizeActionEvent(eventStr) {
+            if (!eventStr || typeof eventStr !== 'string') return '';
+            const s = eventStr.toLowerCase();
+            if (s.includes('play') || s === 'start' || s === 'resume' || s === 'playing') return 'play';
+            if (s.includes('pause') || s === 'stop' || s === 'paused') return 'pause';
+            if (s.includes('end') || s === 'ended') return 'ended';
+            return s;
+        }
+
         window.addEventListener('message', (event) => {
-            if (!event.origin) return;
-            const isSupportedOrigin = event.origin.includes('vixsrc.to') || 
-                                     event.origin.includes('vixsrc.cc') || 
-                                     event.origin.includes('vidsrc.to') || 
-                                     event.origin.includes('vidsrc.me') || 
-                                     event.origin.includes('vidsrc.cc') ||
-                                     event.origin.includes('embed.su') ||
-                                     event.origin.includes('multiembed.co');
-            if (!isSupportedOrigin) return;
-            
+            // Permissive message event parser without origin whitelists to support all mirror CDN domains
             let rawData = event.data;
             let data = rawData;
             
@@ -1115,12 +1115,23 @@
                 }
             }
             
+            console.log("PEZZ8 Player Message Received:", event.origin, data);
+            
             if (typeof data === 'string') {
-                handlePlayerEvent(data);
+                const action = normalizeActionEvent(data);
+                if (action) handlePlayerEvent(action);
                 return;
             }
             
             if (data && typeof data === 'object') {
+                // If it is a standard player event object, parse and normalize it
+                const eventType = data.event || data.type;
+                if (eventType && typeof eventType === 'string') {
+                    const action = normalizeActionEvent(eventType);
+                    if (action) handlePlayerEvent(action, data);
+                }
+                
+                // Track progress / timeupdate
                 if (typeof data.currentTime === 'number' && typeof data.duration === 'number' && data.duration > 0) {
                     state.lastProgress = { currentTime: data.currentTime, duration: data.duration, pct: Math.round((data.currentTime / data.duration) * 100) };
                     
@@ -1132,27 +1143,24 @@
                         }
                     }
                 }
-                const eventType = data.event || data.type;
-                if (eventType) {
-                    handlePlayerEvent(eventType, data);
-                }
             }
         });
 
         function handlePlayerEvent(eventStr, eventObj = {}) {
-            if (eventStr === 'ended' || (state.lastProgress && state.lastProgress.pct >= 95)) {
+            const action = normalizeActionEvent(eventStr);
+            if (action === 'ended' || (state.lastProgress && state.lastProgress.pct >= 95)) {
                 handleEpisodeEnded();
                 return;
             }
             
             if (state.party && state.party.active && state.party.isHost) {
-                if (eventStr === 'play' || eventStr === 'pause') {
+                if (action === 'play' || action === 'pause') {
                     const currentTime = state.lastProgress ? state.lastProgress.currentTime : 0;
                     state.party.connections.forEach(conn => {
                         if (conn.open) {
                             conn.send({
                                 type: 'player_sync',
-                                action: eventStr,
+                                action: action,
                                 time: currentTime
                             });
                         }
@@ -1197,9 +1205,9 @@
                 const separator = baseUrl.includes('?') ? '&' : '?';
                 let syncUrl = `${baseUrl}${separator}startAt=${Math.round(time)}`;
                 if (action !== 'pause') {
-                    syncUrl += `&autoplay=true`;
+                    syncUrl += `&autoplay=true&autoplay=1`;
                 } else {
-                    syncUrl += `&autoplay=false`;
+                    syncUrl += `&autoplay=false&autoplay=0`;
                 }
                 
                 playerFrame.src = syncUrl;
