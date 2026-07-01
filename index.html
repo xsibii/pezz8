@@ -84,39 +84,11 @@
         }
         .search-type-select option { background: var(--surface); color: #fff; }
 
-        .profile-badge {
-            display: flex; align-items: center; gap: 8px; cursor: pointer;
-            padding: 4px 12px 4px 4px; border-radius: 30px; background: rgba(255,255,255,0.06);
-            border: 1px solid var(--border); transition: 0.25s;
-        }
-        .profile-badge:hover { background: rgba(255,255,255,0.12); }
-        .profile-badge span { font-size: 0.8rem; font-weight: 600; color: #d8d8e2; white-space: nowrap; }
         .avatar-circle {
             width: 80px; height: 80px; border-radius: 14px; display: flex; align-items: center;
             justify-content: center; font-size: 2rem; font-weight: 800; font-family: var(--display-font);
             transition: 0.25s; color: #fff; flex-shrink: 0;
         }
-        .avatar-circle.small { width: 28px; height: 28px; border-radius: 8px; font-size: 0.85rem; }
-
-        /* --- SCHERMATA PROFILI --- */
-        .profile-screen {
-            position: fixed; inset: 0; background: var(--dark); z-index: 6000;
-            display: none; flex-direction: column; align-items: center; justify-content: center; gap: 36px;
-            padding: 20px;
-        }
-        .profile-screen h2 { font-family: var(--display-font); font-size: 1.8rem; font-weight: 700; }
-        .profile-grid { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; max-width: 640px; }
-        .profile-avatar { display: flex; flex-direction: column; align-items: center; gap: 8px; cursor: pointer; position: relative; width: 96px; }
-        .profile-avatar span { font-size: 0.85rem; color: #d8d8e2; font-weight: 600; max-width: 96px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .profile-avatar:hover .avatar-circle { transform: scale(1.06); box-shadow: 0 10px 26px rgba(0,0,0,0.5); }
-        .add-circle { background: var(--surface-2); border: 2px dashed var(--gray); color: var(--gray); }
-        .del-profile {
-            position: absolute; top: -6px; right: -6px; width: 22px; height: 22px; border-radius: 50%;
-            background: var(--primary); color: #fff; border: none; cursor: pointer; font-size: 0.62rem;
-            opacity: 0; transition: 0.2s;
-        }
-        .profile-avatar:hover .del-profile { opacity: 1; }
-
         /* --- NAVIGAZIONE --- */
         .nav-tabs { display: flex; justify-content: center; gap: 28px; margin: 18px 0 8px; }
         .nav-tab {
@@ -356,8 +328,6 @@
             .search-input { width: 84px; }
             .search-type-select { font-size: 0.66rem; padding-left: 5px; }
             .logo { font-size: 19px; }
-            .profile-badge span { display: none; }
-            .profile-badge { padding: 4px; }
             .sort-select { padding: 7px 10px; font-size: 0.7rem; }
         }
 
@@ -382,18 +352,8 @@
                     <option value="tv">Serie</option>
                 </select>
             </div>
-            <div class="profile-badge" onclick="switchProfile()" title="Cambia profilo">
-                <div class="avatar-circle small" id="activeProfileAvatar"></div>
-                <span id="activeProfileName"></span>
-            </div>
         </div>
     </header>
-
-    <!-- SCHERMATA SELEZIONE PROFILO (MULTI-PROFILO) -->
-    <div class="profile-screen" id="profileScreen">
-        <h2>Chi sta guardando?</h2>
-        <div class="profile-grid" id="profileGrid"></div>
-    </div>
 
     <div class="hero" id="hero">
         <div class="hero-content">
@@ -487,7 +447,6 @@
         const IMG_URL = 'https://image.tmdb.org/t/p/original';
         const IMG_SMALL = 'https://image.tmdb.org/t/p/w500';
         const CACHE_TTL = 20 * 60 * 1000; // 20 minuti: cache locale risposte TMDB
-        const PROFILE_COLORS = ['#ff3366', '#7b5bff', '#2dd4a3', '#ffb347', '#4cc9f0', '#f72585'];
 
         let state = {
             type: 'movie',
@@ -497,7 +456,6 @@
             searchTimeout: null,
             searchTypeFilter: 'multi',
             sortBy: 'popularity.desc',
-            profile: null,
             myList: {},
             continueWatching: [],
             scrollPosition: 0,
@@ -541,80 +499,13 @@
             }
         }
 
-        // ============== MULTI-PROFILO ==============
-        function getProfiles() { return JSON.parse(localStorage.getItem('pezz8_profiles')) || []; }
-        function saveProfilesList(list) { localStorage.setItem('pezz8_profiles', JSON.stringify(list)); }
-
-        function showProfileScreen() {
-            document.body.classList.add('no-scroll');
-            document.getElementById('profileScreen').style.display = 'flex';
-            renderProfiles();
+        // ============== DATI LOCALI (Lista / Continua a guardare) ==============
+        function loadUserData() {
+            state.myList = JSON.parse(localStorage.getItem('pezz8_mylist')) || {};
+            state.continueWatching = JSON.parse(localStorage.getItem('pezz8_cw')) || [];
         }
-
-        function renderProfiles() {
-            const profiles = getProfiles();
-            const grid = document.getElementById('profileGrid');
-            grid.innerHTML = profiles.map(p => `
-                <div class="profile-avatar" onclick="selectProfile('${p.id}')">
-                    <div class="avatar-circle" style="background:${p.color}">${p.name.charAt(0).toUpperCase()}</div>
-                    <span>${p.name}</span>
-                    <button class="del-profile" onclick="event.stopPropagation(); deleteProfile('${p.id}')"><i class="fas fa-times"></i></button>
-                </div>
-            `).join('') + (profiles.length < 5 ? `
-                <div class="profile-avatar" onclick="addProfile()">
-                    <div class="avatar-circle add-circle"><i class="fas fa-plus"></i></div>
-                    <span>Aggiungi</span>
-                </div>` : '');
-        }
-
-        function addProfile() {
-            const name = prompt('Nome del nuovo profilo:');
-            if (!name || !name.trim()) return;
-            const profiles = getProfiles();
-            const id = 'p_' + Date.now();
-            profiles.push({ id, name: name.trim().slice(0, 16), color: PROFILE_COLORS[profiles.length % PROFILE_COLORS.length] });
-            saveProfilesList(profiles);
-            renderProfiles();
-        }
-
-        function deleteProfile(id) {
-            if (!confirm('Eliminare questo profilo e tutti i suoi dati?')) return;
-            saveProfilesList(getProfiles().filter(p => p.id !== id));
-            localStorage.removeItem(`pezz8_${id}_mylist`);
-            localStorage.removeItem(`pezz8_${id}_cw`);
-            if (state.profile && state.profile.id === id) {
-                localStorage.removeItem('pezz8_active_profile');
-                state.profile = null;
-            }
-            renderProfiles();
-        }
-
-        function selectProfile(id) {
-            const profile = getProfiles().find(p => p.id === id);
-            if (!profile) return;
-            state.profile = profile;
-            localStorage.setItem('pezz8_active_profile', id);
-            loadProfileData();
-            document.getElementById('profileScreen').style.display = 'none';
-            document.body.classList.remove('no-scroll');
-            document.getElementById('activeProfileName').innerText = profile.name;
-            const av = document.getElementById('activeProfileAvatar');
-            av.style.background = profile.color;
-            av.innerText = profile.name.charAt(0).toUpperCase();
-            init();
-        }
-
-        function switchProfile() {
-            document.getElementById('mainContent').innerHTML = '';
-            showProfileScreen();
-        }
-
-        function loadProfileData() {
-            state.myList = JSON.parse(localStorage.getItem(`pezz8_${state.profile.id}_mylist`)) || {};
-            state.continueWatching = JSON.parse(localStorage.getItem(`pezz8_${state.profile.id}_cw`)) || [];
-        }
-        function persistMyList() { localStorage.setItem(`pezz8_${state.profile.id}_mylist`, JSON.stringify(state.myList)); }
-        function persistCW() { localStorage.setItem(`pezz8_${state.profile.id}_cw`, JSON.stringify(state.continueWatching)); }
+        function persistMyList() { localStorage.setItem('pezz8_mylist', JSON.stringify(state.myList)); }
+        function persistCW() { localStorage.setItem('pezz8_cw', JSON.stringify(state.continueWatching)); }
 
         // ============== AVVIO ==============
         window.onload = () => {
@@ -622,13 +513,8 @@
             attachSwipeToClose(document.getElementById('modal'), closeModal);
             attachSwipeToClose(document.getElementById('videoPlayer'), closePlayer);
 
-            const activeId = localStorage.getItem('pezz8_active_profile');
-            const profiles = getProfiles();
-            if (activeId && profiles.find(p => p.id === activeId)) {
-                selectProfile(activeId);
-            } else {
-                showProfileScreen();
-            }
+            loadUserData();
+            init();
         };
 
         async function init() {
