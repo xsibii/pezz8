@@ -81,7 +81,16 @@ const Storage = {
     getHistory() {
         try {
             const raw = localStorage.getItem(this.KEYS.HISTORY);
-            return raw ? JSON.parse(raw) : [];
+            const list = raw ? JSON.parse(raw) : [];
+            // Sanitize existing corrupted entries where a movie was tagged as 'tv' without season
+            return list.map(entry => {
+                if (entry && entry.media_type === 'tv' && (!entry.season || entry.season === null) && !entry.first_air_date && (entry.title || !entry.name)) {
+                    entry.media_type = 'movie';
+                    delete entry.season;
+                    delete entry.episode;
+                }
+                return entry;
+            });
         } catch (e) {
             console.error('Error reading history', e);
             return [];
@@ -95,7 +104,7 @@ const Storage = {
      */
     getContinueWatching() {
         return this.getHistory().filter(h => {
-            if (h.media_type === 'tv') return true;
+            if (h.media_type === 'tv' || (typeof h.season === 'number' && h.season > 0)) return true;
             // For movies, hide if finished (>= 95%)
             return (h.progress || 0) < 95;
         });
@@ -130,7 +139,8 @@ const Storage = {
         const existing = index >= 0 ? history[index] : {};
 
         // TMDB runtime fallback: item runtime, existing runtime, or smart default
-        const isTV = item.media_type === 'tv' || season !== null || existing.media_type === 'tv';
+        const hasValidSeason = (typeof season === 'number' && season > 0);
+        const isTV = (item.media_type === 'tv') || hasValidSeason || (existing.media_type === 'tv' && typeof existing.season === 'number' && existing.season > 0);
         const defaultRuntimeMin = isTV ? 45 : 110;
         const runtimeMinutes = item.runtime || existing.runtime || defaultRuntimeMin;
 
@@ -138,12 +148,27 @@ const Storage = {
         const effectiveDuration = duration > 0 ? duration : (runtimeMinutes * 60);
         const progress = effectiveDuration > 0 ? Math.min(100, Math.round((currentTime / effectiveDuration) * 100)) : 0;
 
+        let resolvedType = 'movie';
+        if (item.media_type === 'tv' || hasValidSeason) {
+            resolvedType = 'tv';
+        } else if (item.media_type === 'movie') {
+            resolvedType = 'movie';
+        } else if (existing.media_type === 'movie') {
+            resolvedType = 'movie';
+        } else if (existing.media_type === 'tv' && typeof existing.season === 'number' && existing.season > 0) {
+            resolvedType = 'tv';
+        } else if (item.first_air_date || (item.name && !item.title)) {
+            resolvedType = 'tv';
+        } else {
+            resolvedType = 'movie';
+        }
+
         const entry = {
             ...existing,
             id: item.id,
             title: item.title || item.name || existing.title,
             name: item.name || item.title || existing.name,
-            media_type: item.media_type || existing.media_type || (season ? 'tv' : 'movie'),
+            media_type: resolvedType,
             poster_path: item.poster_path || existing.poster_path,
             backdrop_path: item.backdrop_path || existing.backdrop_path,
             vote_average: item.vote_average || existing.vote_average,
@@ -151,9 +176,9 @@ const Storage = {
             currentTime: Math.floor(currentTime),
             duration: Math.floor(effectiveDuration),
             progress: progress,
-            season: season !== null ? season : existing.season,
-            episode: episode !== null ? episode : existing.episode,
-            episodeName: episodeName || existing.episodeName || null,
+            season: hasValidSeason ? season : (resolvedType === 'tv' ? existing.season : null),
+            episode: hasValidSeason ? episode : (resolvedType === 'tv' ? existing.episode : null),
+            episodeName: hasValidSeason ? episodeName : (resolvedType === 'tv' ? existing.episodeName : null),
             updatedAt: Date.now()
         };
 

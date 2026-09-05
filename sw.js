@@ -3,7 +3,7 @@
  * Enables PWA installation and caches static assets
  */
 
-const CACHE_NAME = 'streamflix-v4';
+const CACHE_NAME = 'streamflix-v5';
 const STATIC_ASSETS = [
     './',
     './index.html',

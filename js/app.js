@@ -386,13 +386,13 @@ const App = {
 
             // Build info line
             let infoLine = '';
-            if (item.media_type === 'tv' && item.season) {
+            const isTV = item.media_type === 'tv' || (typeof item.season === 'number' && item.season > 0);
+            if (isTV && typeof item.season === 'number' && item.season > 0) {
                 infoLine = `S${item.season}:E${item.episode}`;
                 if (item.episodeName) infoLine += ` • ${item.episodeName}`;
             }
 
             // TMDB runtime fallback: item runtime, or 45m (TV) / 110m (Movie)
-            const isTV = item.media_type === 'tv' || item.season !== null;
             const defaultRuntime = isTV ? 45 : 110;
             const runtimeMinutes = item.runtime || defaultRuntime;
             const totalSecs = (item.duration && item.duration > 0)
@@ -605,7 +605,16 @@ const App = {
 
     async handlePlayItem(item) {
         if (!item) return;
-        const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+        let mediaType = 'movie';
+        if (item.media_type === 'tv') {
+            mediaType = 'tv';
+        } else if (item.media_type === 'movie') {
+            mediaType = 'movie';
+        } else if (item.first_air_date || (item.name && !item.title)) {
+            mediaType = 'tv';
+        } else {
+            mediaType = 'movie';
+        }
 
         // Fetch TMDB details to get runtime
         let runtime = item.runtime || null;
@@ -625,8 +634,8 @@ const App = {
         if (mediaType === 'tv') {
             // Check if there is history for this show (resume last episode)
             const lastWatched = window.Storage.getHistoryEntry(item.id);
-            const season = (lastWatched && lastWatched.season) ? lastWatched.season : 1;
-            const episode = (lastWatched && lastWatched.episode) ? lastWatched.episode : 1;
+            const season = (lastWatched && typeof lastWatched.season === 'number' && lastWatched.season > 0) ? lastWatched.season : 1;
+            const episode = (lastWatched && typeof lastWatched.episode === 'number' && lastWatched.episode > 0) ? lastWatched.episode : 1;
             window.Player.playEpisode(item, season, episode, 10);
         } else {
             window.Player.playMovie(item);
@@ -634,7 +643,8 @@ const App = {
     },
 
     handleResumePlay(historyItem) {
-        if (historyItem.media_type === 'tv') {
+        const isTv = historyItem.media_type === 'tv' || (typeof historyItem.season === 'number' && historyItem.season > 0);
+        if (isTv) {
             window.Player.playEpisode(
                 historyItem,
                 historyItem.season || 1,
@@ -652,7 +662,23 @@ const App = {
         const modal = document.getElementById('detailModal');
         if (!modal) return;
 
-        const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
+        // Immediately hide seasons/episodes section so movies never display previous TV episodes
+        const seasonsSection = document.getElementById('detailSeasonsSection');
+        if (seasonsSection) seasonsSection.style.display = 'none';
+        const episodesList = document.getElementById('episodesList');
+        if (episodesList) episodesList.innerHTML = '';
+
+        let mediaType = 'movie';
+        if (item.media_type === 'tv') {
+            mediaType = 'tv';
+        } else if (item.media_type === 'movie') {
+            mediaType = 'movie';
+        } else if (item.first_air_date || (item.name && !item.title)) {
+            mediaType = 'tv';
+        } else {
+            mediaType = 'movie';
+        }
+
         const bgUrl = window.API.getBackdropUrl(item.backdrop_path || item.poster_path, 'original');
         const title = item.title || item.name;
         const year = (item.release_date || item.first_air_date || '').substring(0, 4);
@@ -702,9 +728,16 @@ const App = {
         const seasonsSection = document.getElementById('detailSeasonsSection');
         const similarSection = document.getElementById('detailSimilarSection');
 
+        if (mediaType !== 'tv' && seasonsSection) {
+            seasonsSection.style.display = 'none';
+        }
+
         try {
             const fullDetails = await window.API.getDetails(mediaType, item.id);
-            if (!fullDetails) return;
+            if (!fullDetails) {
+                if (mediaType !== 'tv' && seasonsSection) seasonsSection.style.display = 'none';
+                return;
+            }
 
             // Genres & Cast
             const genresEl = document.getElementById('detailGenres');

@@ -226,6 +226,16 @@ const Player = {
         // Focus the player modal for TV Remote navigation
         this.container.focus();
 
+        // Ensure episodes drawer button is strictly visible ONLY for TV shows
+        const isTvItem = this.currentItem && this.currentItem.media_type === 'tv';
+        const episodesBtn = document.getElementById('playerEpisodesBtn');
+        const nextBtn = document.getElementById('playerNextEpBtn');
+        if (episodesBtn) episodesBtn.style.display = isTvItem ? 'inline-flex' : 'none';
+        if (nextBtn) nextBtn.style.display = isTvItem ? 'inline-flex' : 'none';
+        if (!isTvItem) {
+            this.closeEpisodesDrawer();
+        }
+
         console.log(`[Player] Loaded embed URL: ${embedUrl}`);
     },
 
