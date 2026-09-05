@@ -55,10 +55,11 @@ const Storage = {
     toggleMyList(item) {
         let list = this.getMyList();
         const index = list.findIndex(i => String(i.id) === String(item.id));
+        let added = false;
         if (index >= 0) {
             list.splice(index, 1);
             localStorage.setItem(this.KEYS.MY_LIST, JSON.stringify(list));
-            return false; // Removed
+            added = false; // Removed
         } else {
             const entry = {
                 id: item.id,
@@ -73,8 +74,13 @@ const Storage = {
             };
             list.unshift(entry);
             localStorage.setItem(this.KEYS.MY_LIST, JSON.stringify(list));
-            return true; // Added
+            added = true; // Added
         }
+
+        if (window.Sync && typeof window.Sync.push === 'function') {
+            window.Sync.push();
+        }
+        return added;
     },
 
     // --- Continue Watching (History) ---
@@ -195,6 +201,10 @@ const Storage = {
         } catch (e) {
             console.error('Error saving history', e);
         }
+
+        if (window.Sync && typeof window.Sync.push === 'function') {
+            window.Sync.push();
+        }
     },
 
     /**
@@ -222,6 +232,9 @@ const Storage = {
             try {
                 localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(history));
             } catch (e) { /* ignore */ }
+            if (window.Sync && typeof window.Sync.push === 'function') {
+                window.Sync.push();
+            }
         }
     },
 
@@ -232,6 +245,83 @@ const Storage = {
         } catch (e) {
             console.error('Error removing from history', e);
         }
+        if (window.Sync && typeof window.Sync.push === 'function') {
+            window.Sync.push();
+        }
+    },
+
+    /**
+     * Smart merge remote cloud data into local storage.
+     * Prevents data loss by merging watch history based on newest updatedAt/progress
+     * and combining unique items in My List.
+     */
+    mergeData(remote) {
+        if (!remote) return { historyChanged: false, listChanged: false };
+        let historyChanged = false;
+        let listChanged = false;
+
+        // 1. Merge Watch History
+        if (Array.isArray(remote.history)) {
+            const localHistory = this.getHistory();
+            const map = new Map();
+            localHistory.forEach(item => {
+                if (item && item.id) map.set(String(item.id), item);
+            });
+
+            remote.history.forEach(remItem => {
+                if (!remItem || !remItem.id) return;
+                const key = String(remItem.id);
+                if (!map.has(key)) {
+                    map.set(key, remItem);
+                    historyChanged = true;
+                } else {
+                    const locItem = map.get(key);
+                    const locUpdated = locItem.updatedAt || 0;
+                    const remUpdated = remItem.updatedAt || 0;
+                    if (remUpdated > locUpdated || (remUpdated === locUpdated && (remItem.currentTime || 0) > (locItem.currentTime || 0))) {
+                        map.set(key, { ...locItem, ...remItem });
+                        historyChanged = true;
+                    }
+                }
+            });
+
+            if (historyChanged) {
+                const merged = Array.from(map.values())
+                    .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+                    .slice(0, 50);
+                try {
+                    localStorage.setItem(this.KEYS.HISTORY, JSON.stringify(merged));
+                } catch (e) {
+                    console.error('Error saving merged history', e);
+                }
+            }
+        }
+
+        // 2. Merge My List
+        if (Array.isArray(remote.myList)) {
+            const localList = this.getMyList();
+            const localIds = new Set(localList.map(i => String(i.id)));
+            const added = [];
+
+            remote.myList.forEach(remItem => {
+                if (remItem && remItem.id && !localIds.has(String(remItem.id))) {
+                    added.push(remItem);
+                    localIds.add(String(remItem.id));
+                    listChanged = true;
+                }
+            });
+
+            if (listChanged) {
+                const merged = [...added, ...localList];
+                try {
+                    localStorage.setItem(this.KEYS.MY_LIST, JSON.stringify(merged));
+                } catch (e) {
+                    console.error('Error saving merged myList', e);
+                }
+            }
+        }
+
+        return { historyChanged, listChanged };
     }
 };
 

@@ -59,6 +59,10 @@
 
         <div class="tv-sidebar-divider"></div>
 
+        <a href="#" class="tv-sidebar-item focusable" id="tvSidebarSync" onclick="window.App && window.App.openSyncModal(); return false;" title="Sincronizza Dispositivi">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+            <span class="label">Sincronizza</span>
+        </a>
         <a href="#" class="tv-sidebar-item focusable" id="tvSidebarQuickId" onclick="window.App && window.App.openQuickIdModal(); return false;">
             <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
             <span class="label">Riproduci con ID</span>
@@ -100,6 +104,12 @@
         <button class="header-icon-btn focusable" id="searchBtn" aria-label="Cerca">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+        </button>
+        <!-- Sync -->
+        <button class="header-icon-btn focusable" id="syncBtn" aria-label="Sincronizza Dispositivi" title="Sincronizza Dispositivi (PIN Cloud)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
             </svg>
         </button>
         <!-- Settings -->
@@ -440,9 +450,136 @@
             <span class="form-hint">Opzionale. La chiave predefinita è già funzionante.</span>
         </div>
 
+        <div class="form-group" style="margin-top:16px; border-top:1px solid rgba(255,255,255,0.1); padding-top:16px;">
+            <label>Sincronizzazione Dispositivi:</label>
+            <p class="form-hint" style="margin-bottom:10px;">Sincronizza 'La mia lista' e 'Continua a guardare' su Smart TV, smartphone e PC con un codice PIN a 6 cifre.</p>
+            <button type="button" class="btn btn-secondary focusable" id="settingsOpenSyncBtn" style="width:100%;" onclick="window.App && window.App.closeSettings(); window.App && window.App.openSyncModal();">
+                🔄 Gestisci Sincronizzazione Dispositivi
+            </button>
+        </div>
+
         <div class="form-actions">
             <button type="button" class="btn btn-play focusable" onclick="window.App && window.App.closeSettings()" style="width:100%;">
                 Salva e Chiudi
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     SYNC MODAL — Cloud & Multi-device Pairing (Solution 1)
+     ============================================================ -->
+<div class="modal-overlay" id="syncModal" role="dialog" aria-modal="true" aria-labelledby="syncModalTitle">
+    <div class="sync-modal-content focusable" tabindex="-1">
+        <button class="modal-close-btn focusable" id="syncCloseBtn" aria-label="Chiudi finestra">&times;</button>
+        
+        <div class="sync-modal-header">
+            <div class="sync-header-icon">🔄</div>
+            <div>
+                <h2 class="form-title" id="syncModalTitle">Sincronizzazione Dispositivi</h2>
+                <p class="sync-subtitle">Collega PC, Smartphone e Smart TV con un codice PIN a 6 cifre</p>
+            </div>
+        </div>
+
+        <!-- Status Banner -->
+        <div class="sync-status-card">
+            <div class="sync-status-left">
+                <div id="syncStatusBadge" class="sync-status-badge disconnected">
+                    <span class="status-dot"></span> Dispositivo Locale (Non sincronizzato)
+                </div>
+                <div id="syncLastUpdateText" class="sync-last-update">Attiva la sincronizzazione per salvare i progressi nel cloud.</div>
+            </div>
+            <div class="sync-status-actions">
+                <button type="button" class="btn btn-secondary btn-sm focusable" id="syncNowBtn" title="Forza sincronizzazione immediata">
+                    🔄 Sincronizza Ora
+                </button>
+                <button type="button" class="btn btn-danger-outline btn-sm focusable" id="syncUnlinkBtn" style="display:none;" title="Scollega da questo cloud">
+                    Disconnetti
+                </button>
+            </div>
+        </div>
+
+        <!-- Main 2-Column Pairing Grid -->
+        <div class="sync-grid">
+            <!-- Col 1: Your PIN & Link another device -->
+            <div class="sync-col">
+                <div class="sync-box">
+                    <h3 class="sync-box-title">📱 Il tuo Codice Dispositivo</h3>
+                    <p class="sync-box-desc">Usa questo PIN per associare gli altri tuoi schermi (Smart TV, tablet, ecc.).</p>
+                    <div class="sync-pin-display-wrapper">
+                        <div class="sync-pin-display" id="syncCurrentPin">NON ASSOCIATO</div>
+                        <button type="button" class="btn btn-secondary btn-sm focusable" id="syncCopyPinBtn" title="Copia PIN negli appunti">
+                            📋 Copia
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-play focusable" id="syncGenerateBtn" style="width:100%; margin-top:12px;">
+                        Genera Codice di Sincronizzazione
+                    </button>
+                </div>
+
+                <div class="sync-box" style="margin-top:16px;">
+                    <h3 class="sync-box-title">🔗 Collega con un PIN esistente</h3>
+                    <p class="sync-box-desc">Hai già generato un codice su un altro dispositivo? Inseriscilo qui:</p>
+                    <form id="syncLinkForm" onsubmit="return false;" style="display:flex; gap:8px; margin-top:10px;">
+                        <input type="text" id="syncInputPin" class="form-control sync-pin-input focusable" placeholder="Es. SF-4829" maxlength="8" autocomplete="off" />
+                        <button type="submit" class="btn btn-play focusable" id="syncLinkBtn" style="flex-shrink:0;">
+                            Collega
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Col 2: Fast QR Code Pairing -->
+            <div class="sync-col">
+                <div class="sync-box text-center">
+                    <h3 class="sync-box-title">📷 Inquadra QR Code</h3>
+                    <p class="sync-box-desc">Apri la fotocamera dello smartphone per collegare all'istante il profilo su questo schermo:</p>
+                    <div id="syncQrContainer" class="sync-qr-container">
+                        <div class="qr-placeholder">Genera un codice PIN per mostrare il QR Code</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Advanced & Backup Accordions -->
+        <details class="sync-accordion">
+            <summary class="sync-accordion-summary focusable">⚙️ Impostazioni Cloud Avanzate (Firebase RTDB)</summary>
+            <div class="sync-accordion-body">
+                <p class="form-hint" style="margin-bottom:8px;">
+                    StreamFlix utilizza la tecnologia <strong>Firebase Realtime Database REST API</strong> per garantire 100% di uptime e compatibilità CORS gratuita su GitHub Pages.
+                </p>
+                <div class="form-group">
+                    <label for="syncDbUrlInput">URL Database Firebase personalizzato (Opzionale):</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="url" id="syncDbUrlInput" class="form-control focusable" placeholder="https://tuo-progetto-default-rtdb.europe-west1.firebasedatabase.app" />
+                        <button type="button" class="btn btn-secondary focusable" id="syncSaveDbBtn" style="flex-shrink:0;">Salva</button>
+                    </div>
+                    <span class="form-hint">Lascia vuoto per utilizzare l'endpoint predefinito. Puoi creare un database gratuito in 60 secondi su console.firebase.google.com con regole <code>{ "rules": { ".read": true, ".write": true } }</code>.</span>
+                </div>
+            </div>
+        </details>
+
+        <details class="sync-accordion" style="margin-top:10px;">
+            <summary class="sync-accordion-summary focusable">💾 Backup & Ripristino Manuale (JSON)</summary>
+            <div class="sync-accordion-body">
+                <p class="form-hint" style="margin-bottom:12px;">
+                    Preferisci un backup locale su file senza cloud? Esporta o ripristina la cronologia e i preferiti in formato JSON.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary focusable" id="syncExportBtn">
+                        ⬇️ Esporta Backup (.json)
+                    </button>
+                    <label class="btn btn-secondary focusable" style="margin:0; cursor:pointer;">
+                        ⬆️ Importa Backup (.json)
+                        <input type="file" id="syncImportFileInput" accept=".json" style="display:none;" />
+                    </label>
+                </div>
+            </div>
+        </details>
+
+        <div class="form-actions" style="margin-top:20px;">
+            <button type="button" class="btn btn-play focusable" onclick="window.App && window.App.closeSyncModal();" style="width:100%;">
+                Fatto
             </button>
         </div>
     </div>
@@ -495,6 +632,7 @@
      ============================================================ -->
 <script src="js/storage.js"></script>
 <script src="js/api.js"></script>
+<script src="js/sync.js"></script>
 <script src="js/player.js"></script>
 <script src="js/tv-navigation.js"></script>
 <script src="js/app.js"></script>

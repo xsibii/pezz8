@@ -2183,3 +2183,282 @@ body.tv-mode .row-nav-btn {
 .search-sort-select:focus {
     border-color: var(--nf-red);
 }
+
+/* ==========================================================================
+   22. Sync Modal (Solution 1: Cloud & Device PIN)
+   ========================================================================== */
+.sync-modal-content {
+    background: #181818;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    width: 100%;
+    max-width: 800px;
+    padding: 32px;
+    position: relative;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.95);
+    animation: modalIn 0.25s ease-out;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.sync-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.sync-header-icon {
+    font-size: 2.2rem;
+    width: 52px;
+    height: 52px;
+    background: rgba(229, 9, 20, 0.15);
+    border: 1px solid rgba(229, 9, 20, 0.4);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.sync-subtitle {
+    color: var(--nf-muted);
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+.sync-status-card {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.sync-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.88rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 14px;
+}
+
+.sync-status-badge .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.sync-status-badge.connected {
+    color: #46D369;
+    background: rgba(70, 211, 105, 0.12);
+    border: 1px solid rgba(70, 211, 105, 0.3);
+}
+
+.sync-status-badge.connected .status-dot {
+    background: #46D369;
+    box-shadow: 0 0 8px #46D369;
+}
+
+.sync-status-badge.disconnected {
+    color: #F59E0B;
+    background: rgba(245, 158, 11, 0.12);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.sync-status-badge.disconnected .status-dot {
+    background: #F59E0B;
+}
+
+.sync-last-update {
+    font-size: 0.8rem;
+    color: var(--nf-muted);
+    margin-top: 4px;
+}
+
+.sync-status-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-sm {
+    padding: 6px 14px !important;
+    font-size: 0.84rem !important;
+}
+
+.btn-danger-outline {
+    background: transparent !important;
+    border: 1px solid rgba(229, 9, 20, 0.6) !important;
+    color: #FF5A5A !important;
+}
+
+.btn-danger-outline:hover {
+    background: rgba(229, 9, 20, 0.15) !important;
+    border-color: #E50914 !important;
+}
+
+.sync-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+@media (max-width: 720px) {
+    .sync-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.sync-box {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.sync-box-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #FFF;
+    margin-bottom: 6px;
+}
+
+.sync-box-desc {
+    font-size: 0.82rem;
+    color: var(--nf-muted);
+    line-height: 1.4;
+    margin-bottom: 12px;
+}
+
+.sync-pin-display-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    background: #0E0E0E;
+    border: 1px dashed rgba(255, 255, 255, 0.25);
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin: 8px 0;
+}
+
+.sync-pin-display {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.75rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: var(--nf-red);
+}
+
+.sync-pin-display.empty {
+    font-size: 0.95rem;
+    color: #737373;
+    letter-spacing: 1px;
+}
+
+.sync-pin-input {
+    text-transform: uppercase;
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: 3px;
+    text-align: center;
+}
+
+.sync-qr-container {
+    background: #FFFFFF;
+    border-radius: 8px;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 8px auto 0;
+    min-height: 220px;
+    max-width: 250px;
+}
+
+.qr-image {
+    width: 170px;
+    height: 170px;
+    display: block;
+    margin: 0 auto;
+}
+
+.qr-instruction {
+    font-size: 0.76rem;
+    color: #222;
+    margin-top: 8px;
+    font-weight: 600;
+    line-height: 1.35;
+    text-align: center;
+}
+
+.qr-placeholder {
+    color: #737373;
+    font-size: 0.85rem;
+    text-align: center;
+    padding: 40px 10px;
+}
+
+.sync-accordion {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.sync-accordion-summary {
+    cursor: pointer;
+    padding: 12px 16px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #DDD;
+    user-select: none;
+}
+
+.sync-accordion-summary:hover {
+    color: #FFF;
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.sync-accordion-body {
+    padding: 14px 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+/* App Toast Notification */
+.app-toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #202020;
+    border: 1px solid var(--nf-red);
+    color: #FFF;
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-size: 0.92rem;
+    font-weight: 600;
+    z-index: 9999;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.85);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.app-toast.visible {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+

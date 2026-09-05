@@ -20,6 +20,9 @@ const App = {
         this.setupEventListeners();
         this.setupSettingsUI();
 
+        // Initialize Cloud & Device Sync (Solution 1)
+        if (window.Sync) window.Sync.init();
+
         // Load initial content
         await this.loadHomeContent();
 
@@ -85,6 +88,19 @@ const App = {
         if (settingsBtn) {
             settingsBtn.addEventListener('click', () => this.openSettings());
         }
+
+        // Sync button & modal triggers
+        const syncBtn = document.getElementById('syncBtn');
+        if (syncBtn) {
+            syncBtn.addEventListener('click', () => this.openSyncModal());
+        }
+
+        const syncCloseBtn = document.getElementById('syncCloseBtn');
+        if (syncCloseBtn) {
+            syncCloseBtn.addEventListener('click', () => this.closeSyncModal());
+        }
+
+        this.setupSyncModalEvents();
 
         // Detail modal close
         const detailCloseBtn = document.getElementById('detailCloseBtn');
@@ -535,6 +551,22 @@ const App = {
         const container = document.getElementById('rowsContainer');
         if (container) {
             this.renderMyListRow(container);
+        }
+    },
+
+    refreshContinueWatching() {
+        const existing = document.getElementById('continueWatchingRow');
+        if (existing) existing.remove();
+        const container = document.getElementById('rowsContainer');
+        if (container && (this.currentCategory === 'all' || !this.currentCategory)) {
+            const history = window.Storage.getContinueWatching();
+            if (history && history.length > 0) {
+                this.renderContinueWatchingRow(container);
+                const newRow = document.getElementById('continueWatchingRow');
+                if (newRow && container.firstChild !== newRow) {
+                    container.insertBefore(newRow, container.firstChild);
+                }
+            }
         }
     },
 
@@ -1033,6 +1065,173 @@ const App = {
             modal.classList.remove('active');
             document.body.classList.remove('no-scroll');
         }
+    },
+
+    // --- Sync Modal (Solution 1: Cloud & Device PIN) ---
+    openSyncModal() {
+        const modal = document.getElementById('syncModal');
+        if (!modal) return;
+        modal.classList.add('active');
+        document.body.classList.add('no-scroll');
+        if (window.Sync) window.Sync.updateUI();
+
+        if (window.TVNav && window.TVNav.isTVMode) {
+            setTimeout(() => {
+                const firstBtn = modal.querySelector('button, input');
+                if (firstBtn) window.TVNav.setFocus(firstBtn);
+            }, 100);
+        }
+    },
+
+    closeSyncModal() {
+        const modal = document.getElementById('syncModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.classList.remove('no-scroll');
+        }
+    },
+
+    setupSyncModalEvents() {
+        // Generate PIN
+        const generateBtn = document.getElementById('syncGenerateBtn');
+        if (generateBtn) {
+            generateBtn.addEventListener('click', () => {
+                if (window.Sync) {
+                    const newPin = window.Sync.generatePin();
+                    this.showToast(`✅ Codice generato: ${newPin}`);
+                }
+            });
+        }
+
+        // Copy PIN
+        const copyPinBtn = document.getElementById('syncCopyPinBtn');
+        if (copyPinBtn) {
+            copyPinBtn.addEventListener('click', () => {
+                const pin = window.Sync ? window.Sync.pin : null;
+                if (!pin) {
+                    alert('Genera prima un codice PIN.');
+                    return;
+                }
+                navigator.clipboard.writeText(pin).then(() => {
+                    this.showToast('📋 Codice PIN copiato!');
+                }).catch(() => {
+                    prompt('Copia il tuo codice PIN:', pin);
+                });
+            });
+        }
+
+        // Link with existing PIN Form
+        const linkForm = document.getElementById('syncLinkForm');
+        if (linkForm) {
+            linkForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const input = document.getElementById('syncInputPin');
+                if (!input || !input.value.trim()) return;
+                const pinToLink = input.value.trim().toUpperCase();
+                if (window.Sync) {
+                    const linkBtn = document.getElementById('syncLinkBtn');
+                    if (linkBtn) {
+                        linkBtn.disabled = true;
+                        linkBtn.textContent = '...';
+                    }
+                    const success = await window.Sync.linkDevice(pinToLink);
+                    if (linkBtn) {
+                        linkBtn.disabled = false;
+                        linkBtn.textContent = 'Collega';
+                    }
+                    if (success) {
+                        input.value = '';
+                        this.showToast('✅ Dispositivo collegato con successo!');
+                    }
+                }
+            });
+        }
+
+        // Force Sync Now
+        const syncNowBtn = document.getElementById('syncNowBtn');
+        if (syncNowBtn) {
+            syncNowBtn.addEventListener('click', async () => {
+                if (!window.Sync || !window.Sync.pin) {
+                    alert('Genera o collega prima un codice PIN.');
+                    return;
+                }
+                syncNowBtn.disabled = true;
+                syncNowBtn.textContent = '⏳ Sincronizzazione...';
+                await window.Sync.pull(false);
+                await window.Sync.pushNow();
+                syncNowBtn.disabled = false;
+                syncNowBtn.textContent = '🔄 Sincronizza Ora';
+                this.showToast('✅ Sincronizzazione completata!');
+            });
+        }
+
+        // Disconnect / Unlink
+        const unlinkBtn = document.getElementById('syncUnlinkBtn');
+        if (unlinkBtn) {
+            unlinkBtn.addEventListener('click', () => {
+                if (window.Sync) window.Sync.unlinkDevice();
+            });
+        }
+
+        // Save Custom Database URL
+        const saveDbBtn = document.getElementById('syncSaveDbBtn');
+        if (saveDbBtn) {
+            saveDbBtn.addEventListener('click', () => {
+                const input = document.getElementById('syncDbUrlInput');
+                if (input && window.Sync) {
+                    window.Sync.setDbUrl(input.value.trim());
+                    this.showToast('⚙️ URL Database salvato!');
+                    if (window.Sync.pin) window.Sync.pushNow();
+                }
+            });
+        }
+
+        // Export Backup JSON
+        const exportBtn = document.getElementById('syncExportBtn');
+        if (exportBtn) {
+            exportBtn.addEventListener('click', () => {
+                if (window.Sync) window.Sync.exportBackup();
+            });
+        }
+
+        // Import Backup JSON
+        const importInput = document.getElementById('syncImportFileInput');
+        if (importInput) {
+            importInput.addEventListener('change', (e) => {
+                const file = e.target.files && e.target.files[0];
+                if (file && window.Sync) {
+                    window.Sync.importBackup(file);
+                    importInput.value = '';
+                }
+            });
+        }
+    },
+
+    onSyncUpdated(changes) {
+        console.log('[App] Dati sincronizzati:', changes);
+        if (this.currentCategory === 'all' || !this.currentCategory) {
+            this.refreshContinueWatching();
+            this.refreshMyList();
+        } else if (this.currentCategory === 'mylist') {
+            this.switchTab('mylist');
+        }
+        this.showToast('🔄 Dati sincronizzati con gli altri dispositivi');
+    },
+
+    showToast(message) {
+        let toast = document.getElementById('appToast');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'appToast';
+            toast.className = 'app-toast';
+            document.body.appendChild(toast);
+        }
+        toast.textContent = message;
+        toast.classList.add('visible');
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => {
+            toast.classList.remove('visible');
+        }, 3200);
     },
 
     setupSettingsUI() {
