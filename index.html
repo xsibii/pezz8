@@ -6,6 +6,15 @@
     <meta name="theme-color" content="#141414">
     <meta name="description" content="StreamFlix — Film e Serie TV in Streaming">
     <title>StreamFlix</title>
+
+    <!-- PWA & Mobile Web App Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="StreamFlix">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="icons/icon.svg">
+
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
 </head>
@@ -71,17 +80,20 @@
         </a>
         <!-- Desktop Nav -->
         <nav class="main-nav" aria-label="Navigazione principale">
-            <a href="#" class="nav-link active focusable" data-target="home">Home</a>
-            <a href="#" class="nav-link focusable" data-target="series">Serie TV</a>
-            <a href="#" class="nav-link focusable" data-target="movies">Film</a>
-            <a href="#" class="nav-link focusable" data-target="mylist">La mia lista</a>
+            <a href="#" class="nav-link active focusable" data-target="home" onclick="window.App && window.App.switchTab('home'); return false;">Home</a>
+            <a href="#" class="nav-link focusable" data-target="series" onclick="window.App && window.App.switchTab('series'); return false;">Serie TV</a>
+            <a href="#" class="nav-link focusable" data-target="movies" onclick="window.App && window.App.switchTab('movies'); return false;">Film</a>
+            <a href="#" class="nav-link focusable" data-target="mylist" onclick="window.App && window.App.switchTab('mylist'); return false;">La mia lista</a>
         </nav>
     </div>
 
     <div class="header-right">
-        <!-- Quick ID button (desktop) -->
-        <button class="header-btn highlight focusable" id="quickIdBtn" title="Riproduci inserendo ID TMDB o IMDb">
-            &#9654; Riproduci con ID
+        <!-- Quick ID button (desktop text, mobile icon only) -->
+        <button class="header-btn highlight focusable" id="quickIdBtn" title="Riproduci inserendo ID TMDB o IMDb" aria-label="Riproduci con ID">
+            <svg class="quick-id-icon" viewBox="0 0 24 24" fill="currentColor">
+                <polygon points="6 4 20 12 6 20 6 4"/>
+            </svg>
+            <span class="quick-id-text">Riproduci con ID</span>
         </button>
         <!-- Search -->
         <button class="header-icon-btn focusable" id="searchBtn" aria-label="Cerca">
@@ -131,6 +143,16 @@
      MAIN CONTENT — Carousels injected by app.js
      ============================================================ -->
 <main class="main-content" id="mainContent">
+    <!-- Genre Filter Bar (for Movies / Series tabs) -->
+    <div class="genre-filter-bar" id="genreFilterBar" style="display:none;">
+        <h2 class="category-heading" id="categoryHeading">Film</h2>
+        <div class="genre-dropdown-wrapper">
+            <select id="genreSelect" class="genre-dropdown focusable">
+                <option value="all">Tutti i generi</option>
+            </select>
+        </div>
+    </div>
+
     <div id="rowsContainer"></div>
 </main>
 
@@ -152,6 +174,10 @@
                         Riproduci
                     </button>
                     <button class="btn btn-info focusable" id="detailListBtn">+ La mia lista</button>
+                    <button class="btn btn-trailer focusable" id="detailTrailerBtn" style="display:none;">
+                        <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        Trailer
+                    </button>
                 </div>
             </div>
         </div>
@@ -184,6 +210,21 @@
                 <h3>Titoli simili</h3>
                 <div class="similar-grid" id="detailSimilarGrid"></div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- ============================================================
+     TRAILER MODAL — Official YouTube Player
+     ============================================================ -->
+<div class="modal-overlay trailer-modal-overlay" id="trailerModal" role="dialog" aria-modal="true" style="display:none;">
+    <div class="trailer-modal-content">
+        <button class="modal-close-btn focusable" id="trailerCloseBtn" aria-label="Chiudi trailer">&times;</button>
+        <div class="trailer-header">
+            <h3 id="trailerTitle">Trailer Ufficiale</h3>
+        </div>
+        <div class="trailer-iframe-wrapper">
+            <iframe id="trailerIframe" src="about:blank" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
         </div>
     </div>
 </div>
@@ -262,6 +303,24 @@
         </div>
         <button class="search-close-btn focusable" id="searchCloseBtn" aria-label="Chiudi ricerca">&times;</button>
     </div>
+
+    <!-- Search Filters Bar -->
+    <div class="search-filters-bar" id="searchFiltersBar">
+        <div class="search-type-pills">
+            <button class="search-pill active focusable" data-filter="all">Tutti</button>
+            <button class="search-pill focusable" data-filter="movie">Solo Film</button>
+            <button class="search-pill focusable" data-filter="tv">Solo Serie TV</button>
+        </div>
+        <div class="search-sort-wrapper">
+            <label for="searchSortSelect">Ordina:</label>
+            <select id="searchSortSelect" class="search-sort-select focusable">
+                <option value="pop">Popolarità</option>
+                <option value="vote">Voto più alto</option>
+                <option value="date">Più recenti</option>
+            </select>
+        </div>
+    </div>
+
     <div class="search-results-grid" id="searchResultsGrid">
         <p class="search-placeholder">Cerca tra migliaia di film e serie TV...</p>
     </div>
@@ -362,7 +421,7 @@
      MOBILE BOTTOM NAV — shown only on ≤768px
      ============================================================ -->
 <nav class="mobile-bottom-nav" aria-label="Navigazione mobile">
-    <a href="#" class="mobile-nav-item active nav-link focusable" data-target="home">
+    <a href="#" class="mobile-nav-item active nav-link focusable" data-target="home" onclick="window.App && window.App.switchTab('home'); return false;">
         <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M3 9.5L12 3l9 6.5V21a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 22V12h6v10"/>
         </svg>
@@ -374,19 +433,19 @@
         </svg>
         <span>Cerca</span>
     </a>
-    <a href="#" class="mobile-nav-item nav-link focusable" data-target="movies">
+    <a href="#" class="mobile-nav-item nav-link focusable" data-target="movies" onclick="window.App && window.App.switchTab('movies'); return false;">
         <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="4" width="20" height="16" rx="2"/><path d="m7 4 5 8 5-8"/><line x1="2" y1="12" x2="22" y2="12"/>
         </svg>
         <span>Film</span>
     </a>
-    <a href="#" class="mobile-nav-item nav-link focusable" data-target="series">
+    <a href="#" class="mobile-nav-item nav-link focusable" data-target="series" onclick="window.App && window.App.switchTab('series'); return false;">
         <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/>
         </svg>
         <span>Serie TV</span>
     </a>
-    <a href="#" class="mobile-nav-item nav-link focusable" data-target="mylist">
+    <a href="#" class="mobile-nav-item nav-link focusable" data-target="mylist" onclick="window.App && window.App.switchTab('mylist'); return false;">
         <svg class="mobile-nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
         </svg>
@@ -408,83 +467,6 @@
 <script src="js/player.js"></script>
 <script src="js/tv-navigation.js"></script>
 <script src="js/app.js"></script>
-
-<!-- Patch app.js hero update to handle new badge elements -->
-<script>
-(function patchHero() {
-    const _origInit = App.init.bind(App);
-    App.init = async function() {
-        await _origInit();
-    };
-
-    // Patch setupHero to populate new hero elements
-    const _origSetupHero = App.setupHero.bind(App);
-    App.setupHero = function(items) {
-        _origSetupHero(items);
-        // Override the badge element if new IDs exist
-        const heroTypeLabel = document.getElementById('heroTypeLabel');
-        const heroBadge = document.getElementById('heroBadge');
-        // Intercept hero updates via MutationObserver on heroTitle
-        const titleEl = document.getElementById('heroTitle');
-        const origBadge = document.getElementById('heroBadge'); // old badge hidden now
-        // Update hero meta row when hero changes
-        if (heroTypeLabel) {
-            const origUpdate = App.heroItem;
-        }
-    };
-})();
-
-// Extended hero updater for new layout
-(function() {
-    const originalSetupHero = App.setupHero;
-    App.setupHero = function(items) {
-        if (!items || items.length === 0) return;
-        const heroSection = document.getElementById('heroBanner');
-        if (!heroSection) return;
-
-        let index = 0;
-        const validItems = items.filter(i => i.backdrop_path && (i.overview || i.title || i.name));
-        if (validItems.length === 0) return;
-
-        const updateHero = (item) => {
-            this.heroItem = item;
-            const bgUrl = window.API.getBackdropUrl(item.backdrop_path, 'original');
-            heroSection.style.backgroundImage = `url('${bgUrl}')`;
-
-            const title = item.title || item.name;
-            const el = (id) => document.getElementById(id);
-
-            if (el('heroTitle')) el('heroTitle').textContent = title;
-            if (el('heroOverview')) el('heroOverview').textContent = item.overview || '';
-            if (el('heroTypeLabel')) el('heroTypeLabel').textContent = item.media_type === 'tv' ? 'SERIE TV' : 'FILM';
-
-            // Rating
-            if (el('heroRating') && item.vote_average) {
-                el('heroRating').textContent = '★ ' + item.vote_average.toFixed(1);
-            }
-            // Year
-            if (el('heroYear')) {
-                const yr = (item.release_date || item.first_air_date || '').substring(0, 4);
-                el('heroYear').textContent = yr;
-            }
-
-            // Buttons
-            const playBtn = el('heroPlayBtn');
-            if (playBtn) playBtn.onclick = () => this.handlePlayItem(item);
-            const infoBtn = el('heroInfoBtn');
-            if (infoBtn) infoBtn.onclick = () => this.openDetailModal(item);
-        };
-
-        updateHero(validItems[0]);
-
-        if (this.heroTimer) clearInterval(this.heroTimer);
-        this.heroTimer = setInterval(() => {
-            index = (index + 1) % validItems.length;
-            updateHero(validItems[index]);
-        }, 25000);
-    };
-})();
-</script>
 
 </body>
 </html>

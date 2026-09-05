@@ -6,6 +6,9 @@ const App = {
     heroItem: null,
     heroTimer: null,
     searchDebounce: null,
+    rawSearchResults: [],
+    searchFilter: 'all',
+    searchSort: 'pop',
 
     async init() {
         console.log('[App] Initializing StreamFlix...');
@@ -22,6 +25,17 @@ const App = {
 
         // Check if there are URL parameters (e.g. ?play=movie&id=123)
         this.handleUrlParams();
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(() => {
+                    console.log('[PWA] Service Worker attivo');
+                }).catch(err => {
+                    console.warn('[PWA] Service Worker non registrato:', err);
+                });
+            });
+        }
     },
 
     setupEventListeners() {
@@ -71,6 +85,31 @@ const App = {
             detailCloseBtn.addEventListener('click', () => this.closeDetailModal());
         }
 
+        // Trailer modal close
+        const trailerCloseBtn = document.getElementById('trailerCloseBtn');
+        if (trailerCloseBtn) {
+            trailerCloseBtn.addEventListener('click', () => this.closeTrailerModal());
+        }
+
+        // Search Filter Pills
+        document.querySelectorAll('.search-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+                document.querySelectorAll('.search-pill').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                this.searchFilter = pill.dataset.filter || 'all';
+                this.renderFilteredSearchResults();
+            });
+        });
+
+        // Search Sort Select
+        const searchSortSelect = document.getElementById('searchSortSelect');
+        if (searchSortSelect) {
+            searchSortSelect.addEventListener('change', (e) => {
+                this.searchSort = e.target.value;
+                this.renderFilteredSearchResults();
+            });
+        }
+
         // Header background transition on scroll
         window.addEventListener('scroll', () => {
             const header = document.getElementById('mainHeader');
@@ -104,7 +143,12 @@ const App = {
             // 4. My List (if exists)
             this.renderMyListRow(container);
 
-            // 5. Trending Row
+            // 5. Top 10 Netflix Row
+            if (trending && trending.length >= 5) {
+                this.renderTop10Row(container, trending.slice(0, 10));
+            }
+
+            // 6. Trending Row
             if (trending && trending.length > 0) {
                 this.createRow(container, 'Trending Now • I più visti oggi', trending);
             }
@@ -159,15 +203,29 @@ const App = {
         const updateHero = (item) => {
             this.heroItem = item;
             const bgUrl = window.API.getBackdropUrl(item.backdrop_path, 'original');
-            heroSection.style.backgroundImage = `linear-gradient(to bottom, rgba(20,20,20,0.2) 0%, rgba(20,20,20,0.8) 70%, #141414 100%), linear-gradient(to right, rgba(20,20,20,0.9) 0%, rgba(20,20,20,0.5) 40%, transparent 100%), url('${bgUrl}')`;
+            heroSection.style.backgroundImage = `url('${bgUrl}')`;
 
             const title = item.title || item.name;
-            document.getElementById('heroTitle').textContent = title;
-            document.getElementById('heroOverview').textContent = item.overview || 'Guarda ora in streaming su StreamFlix con vixsrc.to.';
+            const titleEl = document.getElementById('heroTitle');
+            if (titleEl) titleEl.textContent = title;
 
-            const badge = document.getElementById('heroBadge');
-            if (badge) {
-                badge.textContent = item.media_type === 'tv' ? 'SERIE TV' : 'FILM';
+            const overviewEl = document.getElementById('heroOverview');
+            if (overviewEl) overviewEl.textContent = item.overview || 'Guarda ora in streaming su StreamFlix con vixsrc.to.';
+
+            const typeLabel = document.getElementById('heroTypeLabel');
+            if (typeLabel) {
+                typeLabel.textContent = (item.media_type === 'tv' || !!item.first_air_date) ? 'SERIE TV' : 'FILM';
+            }
+
+            const ratingEl = document.getElementById('heroRating');
+            if (ratingEl) {
+                ratingEl.textContent = item.vote_average ? '★ ' + item.vote_average.toFixed(1) : '';
+            }
+
+            const yearEl = document.getElementById('heroYear');
+            if (yearEl) {
+                const yr = (item.release_date || item.first_air_date || '').substring(0, 4);
+                yearEl.textContent = yr;
             }
 
             // Setup Buttons
@@ -473,6 +531,71 @@ const App = {
         }
     },
 
+    renderTop10Row(container, items) {
+        if (!items || items.length === 0) return;
+
+        const rowWrapper = document.createElement('section');
+        rowWrapper.className = 'top10-row';
+
+        const titleEl = document.createElement('h2');
+        titleEl.className = 'row-title';
+        titleEl.textContent = 'Top 10 dei titoli più visti oggi in Italia';
+        rowWrapper.appendChild(titleEl);
+
+        const cardsContainer = document.createElement('div');
+        cardsContainer.className = 'top10-cards';
+
+        items.slice(0, 10).forEach((item, index) => {
+            const rank = index + 1;
+            const card = document.createElement('div');
+            card.className = 'top10-card focusable';
+            card.tabIndex = 0;
+
+            const posterUrl = window.API.getImageUrl(item.poster_path || item.backdrop_path, 'w500');
+            const title = item.title || item.name;
+            const rating = item.vote_average ? Math.round(item.vote_average * 10) : null;
+            const isTv = item.media_type === 'tv' || !!item.first_air_date;
+
+            card.innerHTML = `
+                <div class="top10-rank">${rank}</div>
+                <div class="card-poster-wrapper">
+                    <span class="card-type-tag">${isTv ? 'SERIE' : 'FILM'}</span>
+                    <img src="${posterUrl}" alt="${title}" loading="lazy" class="card-poster" />
+                    <div class="card-overlay">
+                        <div class="card-actions">
+                            <button class="card-btn play-btn" title="Riproduci">&#9658;</button>
+                            <button class="card-btn list-btn" title="La mia lista">${window.Storage.isInMyList(item.id) ? '&#10003;' : '+'}</button>
+                            <button class="card-btn info-btn" title="Dettagli">&#9432;</button>
+                        </div>
+                        <h3 class="card-title">${title}</h3>
+                        <div class="card-meta">
+                            ${rating ? `<span class="card-match">${rating}% Match</span>` : ''}
+                            <span class="card-badge">TOP 10</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            card.addEventListener('click', (e) => {
+                if (e.target.closest('.play-btn')) {
+                    this.handlePlayItem(item);
+                } else if (e.target.closest('.list-btn')) {
+                    const btn = e.target.closest('.list-btn');
+                    const added = window.Storage.toggleMyList(item);
+                    btn.innerHTML = added ? '&#10003;' : '+';
+                    this.refreshMyList();
+                } else {
+                    this.openDetailModal(item);
+                }
+            });
+
+            cardsContainer.appendChild(card);
+        });
+
+        rowWrapper.appendChild(cardsContainer);
+        container.appendChild(rowWrapper);
+    },
+
     async handlePlayItem(item) {
         if (!item) return;
         const mediaType = item.media_type || (item.first_air_date ? 'tv' : 'movie');
@@ -608,8 +731,53 @@ const App = {
                 similarSection.style.display = 'none';
             }
 
+            // Official YouTube Trailer
+            const trailerBtn = document.getElementById('detailTrailerBtn');
+            if (trailerBtn) {
+                const trailerKey = await window.API.getTrailer(mediaType, item.id, fullDetails.videos ? fullDetails.videos.results : null);
+                if (trailerKey) {
+                    trailerBtn.style.display = 'inline-flex';
+                    trailerBtn.onclick = () => {
+                        this.openTrailerModal(fullDetails.title || fullDetails.name, trailerKey);
+                    };
+                } else {
+                    trailerBtn.style.display = 'none';
+                }
+            }
+
         } catch (e) {
             console.error('Error fetching full details:', e);
+        }
+    },
+
+    openTrailerModal(title, key) {
+        const modal = document.getElementById('trailerModal');
+        const iframe = document.getElementById('trailerIframe');
+        const titleEl = document.getElementById('trailerTitle');
+        if (!modal || !iframe) return;
+
+        if (titleEl) titleEl.textContent = `🎬 Trailer: ${title}`;
+        iframe.src = `https://www.youtube-nocookie.com/embed/${key}?autoplay=1&rel=0`;
+        modal.style.display = 'flex';
+        modal.classList.add('active');
+    },
+
+    closeTrailerModal() {
+        const modal = document.getElementById('trailerModal');
+        const iframe = document.getElementById('trailerIframe');
+        if (!modal) return;
+
+        modal.style.display = 'none';
+        modal.classList.remove('active');
+        if (iframe) iframe.src = 'about:blank';
+    },
+
+    closeDetailModal() {
+        this.closeTrailerModal();
+        const modal = document.getElementById('detailModal');
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.classList.remove('no-scroll');
         }
     },
 
@@ -682,14 +850,6 @@ const App = {
         }
     },
 
-    closeDetailModal() {
-        const modal = document.getElementById('detailModal');
-        if (modal) {
-            modal.classList.remove('active');
-            document.body.classList.remove('no-scroll');
-        }
-    },
-
     // --- Search ---
     openSearch() {
         const overlay = document.getElementById('searchOverlay');
@@ -717,20 +877,49 @@ const App = {
         if (!resultsGrid) return;
 
         if (!query || query.trim().length < 2) {
-            resultsGrid.innerHTML = '<p class="search-placeholder">Cerca i tuoi film, serie TV o generi preferiti...</p>';
+            this.rawSearchResults = [];
+            resultsGrid.innerHTML = '<p class="search-placeholder">Cerca tra migliaia di film e serie TV...</p>';
             return;
         }
 
         resultsGrid.innerHTML = '<div class="loading-spinner">Ricerca in corso...</div>';
         const results = await window.API.search(query);
+        this.rawSearchResults = results || [];
+        this.renderFilteredSearchResults();
+    },
 
-        if (!results || results.length === 0) {
-            resultsGrid.innerHTML = `<p class="search-placeholder">Nessun titolo trovato per "${query}". Prova con un altro nome.</p>`;
+    renderFilteredSearchResults() {
+        const resultsGrid = document.getElementById('searchResultsGrid');
+        if (!resultsGrid) return;
+
+        let list = [...this.rawSearchResults];
+
+        // 1. Filtro Tipo (All / Movie / TV)
+        if (this.searchFilter === 'movie') {
+            list = list.filter(i => i.media_type === 'movie');
+        } else if (this.searchFilter === 'tv') {
+            list = list.filter(i => i.media_type === 'tv');
+        }
+
+        // 2. Ordinamento
+        if (this.searchSort === 'vote') {
+            list.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+        } else if (this.searchSort === 'date') {
+            list.sort((a, b) => {
+                const dateA = a.release_date || a.first_air_date || '';
+                const dateB = b.release_date || b.first_air_date || '';
+                return dateB.localeCompare(dateA);
+            });
+        }
+        // default: popolarità (già ordinato da TMDB)
+
+        if (list.length === 0) {
+            resultsGrid.innerHTML = '<p class="search-placeholder">Nessun titolo trovato con i filtri selezionati.</p>';
             return;
         }
 
         resultsGrid.innerHTML = '';
-        results.forEach(item => {
+        list.forEach(item => {
             const card = this.createCard(item);
             resultsGrid.appendChild(card);
         });
@@ -876,31 +1065,55 @@ const App = {
 
         const hero = document.getElementById('heroBanner');
         const container = document.getElementById('rowsContainer');
+        const genreBar = document.getElementById('genreFilterBar');
         if (!container) return;
 
         this.showLoading(true);
 
         try {
             if (target === 'home') {
-                if (hero) hero.style.display = 'block';
+                if (hero) {
+                    hero.classList.remove('hidden');
+                    hero.style.display = 'flex';
+                }
+                if (genreBar) genreBar.style.display = 'none';
+                document.body.classList.remove('no-hero');
                 await this.loadHomeContent();
             } else if (target === 'movies') {
-                if (hero) hero.style.display = 'none';
+                if (hero) {
+                    hero.classList.remove('hidden');
+                    hero.style.display = 'flex';
+                }
+                document.body.classList.remove('no-hero');
+                this.setupGenreDropdown('movie');
                 container.innerHTML = '';
                 const popular = await window.API.getPopularMovies();
+                if (popular && popular.length > 0) {
+                    this.setupHero(popular);
+                }
                 this.createRow(container, 'Film Più Visti', popular);
                 const action = await window.API.getByGenre('movie', 28);
-                this.createRow(container, 'Azione', action);
+                this.createRow(container, 'Azione e Avventura', action);
                 const comedy = await window.API.getByGenre('movie', 35);
-                this.createRow(container, 'Commedia', comedy);
+                this.createRow(container, 'Commedie', comedy);
                 const scifi = await window.API.getByGenre('movie', 878);
                 this.createRow(container, 'Fantascienza', scifi);
+                const thriller = await window.API.getByGenre('movie', 53);
+                this.createRow(container, 'Thriller e Suspense', thriller);
                 const horror = await window.API.getByGenre('movie', 27);
                 this.createRow(container, 'Horror e Terrore', horror);
             } else if (target === 'series') {
-                if (hero) hero.style.display = 'none';
+                if (hero) {
+                    hero.classList.remove('hidden');
+                    hero.style.display = 'flex';
+                }
+                document.body.classList.remove('no-hero');
+                this.setupGenreDropdown('tv');
                 container.innerHTML = '';
                 const popular = await window.API.getPopularTV();
+                if (popular && popular.length > 0) {
+                    this.setupHero(popular);
+                }
                 this.createRow(container, 'Serie TV Popolari', popular);
                 const top = await window.API.getTopRatedTV();
                 this.createRow(container, 'Serie TV Più Votate', top);
@@ -908,8 +1121,15 @@ const App = {
                 this.createRow(container, 'Serie Drammatiche', drama);
                 const comedy = await window.API.getByGenre('tv', 35);
                 this.createRow(container, 'Serie Comiche', comedy);
+                const scifi = await window.API.getByGenre('tv', 10765);
+                this.createRow(container, 'Fantascienza & Fantasy', scifi);
             } else if (target === 'mylist') {
-                if (hero) hero.style.display = 'none';
+                if (hero) {
+                    hero.classList.add('hidden');
+                    hero.style.display = 'none';
+                }
+                if (genreBar) genreBar.style.display = 'none';
+                document.body.classList.add('no-hero');
                 container.innerHTML = '';
                 const list = window.Storage.getMyList();
                 if (!list || list.length === 0) {
@@ -922,7 +1142,7 @@ const App = {
                 } else {
                     const section = document.createElement('section');
                     section.className = 'grid-section';
-                    section.innerHTML = '<h2 class="section-title">I Tuoi Preferiti</h2>';
+                    section.innerHTML = `<h2 class="section-title">I Tuoi Preferiti (${list.length})</h2>`;
                     const grid = document.createElement('div');
                     grid.className = 'content-grid';
                     list.forEach(i => grid.appendChild(this.createCard(i)));
@@ -935,7 +1155,65 @@ const App = {
         } finally {
             this.showLoading(false);
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            if (window.TVNav && window.TVNav.isTVMode) {
+                window.TVNav.focusFirstAvailable();
+            }
         }
+    },
+
+    setupGenreDropdown(mediaType) {
+        const bar = document.getElementById('genreFilterBar');
+        const heading = document.getElementById('categoryHeading');
+        const select = document.getElementById('genreSelect');
+        if (!bar || !select) return;
+
+        bar.style.display = 'flex';
+        if (heading) {
+            heading.textContent = mediaType === 'tv' ? 'Serie TV' : 'Film';
+        }
+
+        const genres = mediaType === 'tv' ? window.API.TV_GENRES : window.API.MOVIE_GENRES;
+        select.innerHTML = genres.map(g => `<option value="${g.id}">${g.name}</option>`).join('');
+
+        select.onchange = async (e) => {
+            const genreId = e.target.value;
+            const container = document.getElementById('rowsContainer');
+            if (!container) return;
+
+            this.showLoading(true);
+            container.innerHTML = '';
+
+            try {
+                if (genreId === 'all') {
+                    await this.switchTab(mediaType === 'tv' ? 'series' : 'movies');
+                } else {
+                    const selectedGenre = genres.find(g => String(g.id) === String(genreId));
+                    const genreName = selectedGenre ? selectedGenre.name : 'In evidenza';
+                    const items = await window.API.getByGenre(mediaType === 'tv' ? 'tv' : 'movie', genreId);
+
+                    if (items && items.length > 0) {
+                        this.setupHero(items);
+                        this.createRow(container, `${genreName} • Più Popolari`, items);
+
+                        const moreData = await window.API.fetchTMDB(`/discover/${mediaType === 'tv' ? 'tv' : 'movie'}`, {
+                            with_genres: genreId,
+                            sort_by: 'vote_average.desc',
+                            'vote_count.gte': 50
+                        });
+                        if (moreData && moreData.results) {
+                            const mapped = moreData.results.map(i => ({ ...i, media_type: mediaType === 'tv' ? 'tv' : 'movie' }));
+                            this.createRow(container, `${genreName} • Più Votati`, mapped);
+                        }
+                    } else {
+                        container.innerHTML = '<div class="empty-state"><h3>Nessun titolo trovato per questa categoria</h3></div>';
+                    }
+                }
+            } catch (err) {
+                console.error('Error loading genre:', err);
+            } finally {
+                this.showLoading(false);
+            }
+        };
     },
 
     showLoading(show) {

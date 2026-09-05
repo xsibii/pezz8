@@ -129,6 +129,83 @@ const API = {
         return (data && data.results) ? data.results.filter(i => (i.media_type === 'movie' || i.media_type === 'tv') && (i.poster_path || i.backdrop_path)) : [];
     },
 
+    // --- Genre Catalogs ---
+    MOVIE_GENRES: [
+        { id: 'all', name: 'Tutti i generi' },
+        { id: 28, name: 'Azione' },
+        { id: 12, name: 'Avventura' },
+        { id: 16, name: 'Animazione' },
+        { id: 35, name: 'Commedia' },
+        { id: 80, name: 'Crime / Poliziesco' },
+        { id: 99, name: 'Documentario' },
+        { id: 18, name: 'Drammatico' },
+        { id: 10751, name: 'Famiglia' },
+        { id: 14, name: 'Fantasy' },
+        { id: 27, name: 'Horror' },
+        { id: 9648, name: 'Mistero' },
+        { id: 10749, name: 'Romantico' },
+        { id: 878, name: 'Fantascienza' },
+        { id: 53, name: 'Thriller' },
+        { id: 37, name: 'Western' }
+    ],
+
+    TV_GENRES: [
+        { id: 'all', name: 'Tutti i generi' },
+        { id: 10759, name: 'Azione e Avventura' },
+        { id: 16, name: 'Animazione' },
+        { id: 35, name: 'Commedia' },
+        { id: 80, name: 'Crime / Poliziesco' },
+        { id: 99, name: 'Documentario' },
+        { id: 18, name: 'Drammatico' },
+        { id: 10751, name: 'Famiglia' },
+        { id: 10762, name: 'Bambini' },
+        { id: 9648, name: 'Mistero' },
+        { id: 10765, name: 'Sci-Fi & Fantasy' },
+        { id: 10768, name: 'Guerra & Politica' },
+        { id: 37, name: 'Western' }
+    ],
+
+    // --- Official YouTube Trailer Finder ---
+    async getTrailer(mediaType, id, preloadedVideos = null) {
+        let videos = preloadedVideos;
+        if (!videos) {
+            const data = await this.fetchTMDB(`/${mediaType}/${id}/videos`);
+            videos = data && data.results ? data.results : [];
+        }
+
+        if (!videos || videos.length === 0) {
+            // Prova fallback in lingua inglese
+            try {
+                const enData = await this.fetchTMDB(`/${mediaType}/${id}/videos`, { language: 'en-US' });
+                videos = enData && enData.results ? enData.results : [];
+            } catch (e) {
+                videos = [];
+            }
+        }
+
+        const ytVideos = videos.filter(v => v.site === 'YouTube');
+        if (ytVideos.length === 0) return null;
+
+        // 1. Cerca trailer in italiano
+        const itTrailer = ytVideos.find(v => v.iso_639_1 === 'it' && v.type === 'Trailer');
+        if (itTrailer) return itTrailer.key;
+
+        // 2. Cerca teaser in italiano
+        const itTeaser = ytVideos.find(v => v.iso_639_1 === 'it');
+        if (itTeaser) return itTeaser.key;
+
+        // 3. Cerca trailer ufficiale in lingua originale
+        const officialTrailer = ytVideos.find(v => v.type === 'Trailer' && (v.official === true || (v.name && v.name.toLowerCase().includes('official'))));
+        if (officialTrailer) return officialTrailer.key;
+
+        // 4. Qualsiasi trailer
+        const anyTrailer = ytVideos.find(v => v.type === 'Trailer');
+        if (anyTrailer) return anyTrailer.key;
+
+        // 5. Primo video YouTube disponibile
+        return ytVideos[0].key;
+    },
+
     // --- vixsrc.to Catalog API ---
     async getVixsrcCatalog(type = 'movie', lang = 'it') {
         const url = `${this.VIXSRC_BASE}/api/list/${type}?lang=${lang}`;
