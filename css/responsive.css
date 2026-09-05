@@ -1,0 +1,494 @@
+/* ==========================================================================
+   StreamFlix — Responsive Layouts: Smart TV, Desktop PC & Mobile
+   ========================================================================== */
+
+/* ==========================================================================
+   1. Smart TV Layout (When body.tv-mode is active OR screen is extra large TV)
+   Matches Reference Image 1 (TV):
+   - Vertical left icon sidebar
+   - Wide hero filling remaining screen
+   - Scaled UI for 10-foot viewing distance
+   ========================================================================== */
+body.tv-mode .tv-sidebar {
+    display: flex !important;
+}
+
+body.tv-mode .main-header {
+    display: none !important;
+}
+
+body.tv-mode .mobile-bottom-nav {
+    display: none !important;
+}
+
+body.tv-mode .hero-banner {
+    margin-left: 72px;
+    width: calc(100% - 72px);
+    min-height: 52vw;
+    padding: 0 5% 10vh;
+}
+
+body.tv-mode .main-content {
+    margin-left: 72px;
+    width: calc(100% - 72px);
+    padding-bottom: 60px;
+}
+
+body.tv-mode .hero-title {
+    font-size: clamp(2.6rem, 5vw, 4.4rem);
+}
+
+body.tv-mode .hero-overview {
+    font-size: 1.15rem;
+    max-width: 620px;
+    line-height: 1.6;
+}
+
+body.tv-mode .card {
+    flex: 0 0 200px;
+}
+
+body.tv-mode .continue-card {
+    flex: 0 0 320px;
+}
+
+body.tv-mode .row-title {
+    font-size: 1.6rem;
+    margin-bottom: 14px;
+}
+
+/* ==========================================================================
+   2. Desktop PC Layout (min-width: 769px)
+   Matches Reference Image 3 (PC / Netflix Web):
+   - Fixed top header with logo, navigation links & right action icons
+   - Full-bleed cinematic billboard hero
+   - Horizontal carousels with hover-triggered scroll arrows
+   ========================================================================== */
+@media (min-width: 769px) {
+    /* Top header */
+    .main-header {
+        display: flex;
+        height: 68px;
+        padding: 0 4%;
+    }
+
+    .main-nav {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    /* Mobile bottom nav is hidden on PC */
+    .mobile-bottom-nav {
+        display: none !important;
+    }
+
+    /* TV sidebar is hidden in standard PC mode unless tv-mode is enabled */
+    body:not(.tv-mode) .tv-sidebar {
+        display: none;
+    }
+
+    body:not(.tv-mode) .hero-banner {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    body:not(.tv-mode) .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    /* Billboard */
+    .hero-banner {
+        min-height: 48vw;
+        max-height: 85vh;
+        padding: 0 4% 12vh;
+    }
+
+    .hero-title {
+        font-size: clamp(2.2rem, 4vw, 3.8rem);
+    }
+
+    /* Cards */
+    .card {
+        flex: 0 0 175px;
+    }
+
+    .continue-card {
+        flex: 0 0 290px;
+    }
+}
+
+/* Wide / Ultra-Wide Desktop (min-width: 1400px) */
+@media (min-width: 1400px) {
+    .card {
+        flex: 0 0 195px;
+    }
+
+    .continue-card {
+        flex: 0 0 320px;
+    }
+
+    .hero-banner {
+        min-height: 44vw;
+        max-height: 82vh;
+    }
+}
+
+/* ==========================================================================
+   3. Tablet Devices (769px - 1024px)
+   ========================================================================== */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .main-header {
+        height: 60px;
+        padding: 0 3%;
+    }
+
+    .main-nav {
+        gap: 14px;
+    }
+
+    .nav-link {
+        font-size: 0.84rem;
+    }
+
+    .hero-banner {
+        min-height: 54vw;
+        padding: 0 3% 10vh;
+    }
+
+    .hero-title {
+        font-size: 2.5rem;
+    }
+
+    .card {
+        flex: 0 0 150px;
+    }
+
+    .continue-card {
+        flex: 0 0 240px;
+    }
+}
+
+/* ==========================================================================
+   4. Mobile Smartphones (max-width: 768px)
+   Matches Reference Image 2 (Netflix Mobile App):
+   - Compact transparent header with logo & search
+   - Full-impact portrait hero banner
+   - Centered action buttons (Riproduci, + La mia lista, Info)
+   - Fixed translucent bottom tab navigation
+   - Bottom-sheet style detail modal
+   ========================================================================== */
+@media (max-width: 768px) {
+    /* Hide TV sidebar */
+    .tv-sidebar {
+        display: none !important;
+    }
+
+    /* Mobile Header */
+    .main-header {
+        height: 54px;
+        padding: 0 16px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, transparent 100%);
+    }
+
+    .main-header.scrolled {
+        background-color: var(--nf-black);
+    }
+
+    /* Hide PC desktop nav links */
+    .main-nav {
+        display: none !important;
+    }
+
+    .brand-logo .logo-stream,
+    .brand-logo .logo-flix {
+        font-size: 1.35rem;
+    }
+
+    /* Quick ID button text shortened on mobile */
+    .header-btn.highlight {
+        font-size: 0.72rem;
+        padding: 4px 8px;
+    }
+
+    /* Mobile Hero Banner */
+    .hero-banner {
+        margin-left: 0 !important;
+        width: 100% !important;
+        min-height: 80vh;
+        max-height: 88vh;
+        padding: 0 20px 30px;
+        align-items: flex-end;
+        background-position: center top;
+        background-size: cover;
+    }
+
+    .hero-content {
+        max-width: 100%;
+        text-align: center;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .hero-top-label {
+        justify-content: center;
+        font-size: 0.75rem;
+        margin-bottom: 8px;
+    }
+
+    .hero-title {
+        font-size: 1.85rem;
+        margin-bottom: 8px;
+        line-height: 1.15;
+    }
+
+    .hero-meta {
+        justify-content: center;
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+
+    .hero-overview {
+        font-size: 0.86rem;
+        line-height: 1.4;
+        -webkit-line-clamp: 2;
+        margin-bottom: 18px;
+        color: rgba(255, 255, 255, 0.8);
+        text-align: center;
+        max-width: 90%;
+    }
+
+    /* Centered Mobile Action Row (Play, Info, My List) */
+    .hero-actions {
+        width: 100%;
+        justify-content: center;
+        gap: 12px;
+    }
+
+    .hero-actions .btn {
+        flex: 1;
+        max-width: 160px;
+        padding: 9px 16px;
+        font-size: 0.9rem;
+    }
+
+    /* Main content margin adjustment */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        margin-top: -30px;
+        padding-bottom: 90px; /* Space for bottom tab bar */
+    }
+
+    .content-row {
+        margin-bottom: 24px;
+        padding: 0 16px;
+    }
+
+    .row-title {
+        font-size: 1.12rem;
+        margin-bottom: 8px;
+    }
+
+    .row-cards {
+        gap: 8px;
+        padding: 4px 0 16px;
+    }
+
+    /* Cards sized for mobile screens */
+    .card {
+        flex: 0 0 120px;
+        border-radius: 4px;
+    }
+
+    .continue-card {
+        flex: 0 0 190px;
+    }
+
+    /* Disable hover zoom on touch */
+    .card:hover {
+        transform: none;
+    }
+
+    .continue-card:hover {
+        transform: none;
+    }
+
+    /* Always show subtle title overlay on mobile */
+    .card-overlay, .card-info-overlay {
+        opacity: 1;
+        background: linear-gradient(0deg, rgba(0,0,0,0.88) 0%, transparent 100%);
+        padding: 6px;
+    }
+
+    .card-actions {
+        display: none; /* Tap card opens details modal directly */
+    }
+
+    .card-title {
+        font-size: 0.74rem;
+        margin-bottom: 2px;
+    }
+
+    .card-meta {
+        font-size: 0.65rem;
+    }
+
+    .continue-time-badge {
+        font-size: 0.6rem;
+        padding: 2px 5px;
+        top: 4px;
+        right: 4px;
+    }
+
+    .card-time-remaining {
+        font-size: 0.62rem;
+        padding: 1px 4px;
+    }
+
+    /* Hide desktop row nav buttons */
+    .row-nav-btn {
+        display: none !important;
+    }
+
+    /* Mobile Bottom Navigation */
+    .mobile-bottom-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 56px;
+        background: rgba(18, 18, 18, 0.95);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+        z-index: 95;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .mobile-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 3px;
+        color: var(--nf-muted);
+        text-decoration: none;
+        font-size: 0.62rem;
+        padding: 4px 8px;
+        transition: color 0.2s;
+    }
+
+    .mobile-nav-item.active {
+        color: var(--nf-text);
+    }
+
+    .mobile-nav-icon {
+        width: 20px;
+        height: 20px;
+    }
+
+    /* Detail Modal Mobile: Bottom sheet style */
+    .modal-overlay {
+        padding: 0;
+        align-items: flex-end;
+    }
+
+    .modal-content {
+        max-height: 90vh;
+        border-radius: 16px 16px 0 0;
+        animation: sheetUp 0.28s cubic-bezier(0.2, 0.9, 0.3, 1);
+    }
+
+    @keyframes sheetUp {
+        from { transform: translateY(100%); }
+        to   { transform: translateY(0); }
+    }
+
+    .detail-backdrop {
+        height: 220px;
+        padding: 16px;
+    }
+
+    .detail-title {
+        font-size: 1.5rem;
+    }
+
+    .detail-body {
+        padding: 16px;
+    }
+
+    .detail-overview {
+        font-size: 0.88rem;
+    }
+
+    .episode-card {
+        gap: 12px;
+        padding: 10px;
+    }
+
+    .ep-thumb-wrapper {
+        width: 100px;
+        height: 58px;
+    }
+
+    .ep-num {
+        min-width: 16px;
+        font-size: 1rem;
+    }
+
+    .ep-title {
+        font-size: 0.85rem;
+    }
+
+    /* Search overlay mobile */
+    .search-overlay {
+        padding: 14px 16px;
+    }
+
+    .search-input {
+        font-size: 1rem;
+        padding: 11px 16px 11px 44px;
+    }
+
+    .search-results-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    /* Player fullscreen on mobile */
+    .player-header {
+        padding: 12px 14px;
+    }
+
+    .player-info h3 {
+        font-size: 0.95rem;
+    }
+
+    .player-auto-next {
+        bottom: 20px;
+        right: 14px;
+        left: 14px;
+        padding: 14px;
+    }
+}
+
+/* Extra small devices (< 360px) */
+@media (max-width: 360px) {
+    .card {
+        flex: 0 0 105px;
+    }
+
+    .continue-card {
+        flex: 0 0 160px;
+    }
+
+    .search-results-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}

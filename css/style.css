@@ -1,0 +1,1659 @@
+/* ==========================================================================
+   StreamFlix — Netflix-accurate Design System
+   ========================================================================== */
+
+:root {
+    --nf-red: #E50914;
+    --nf-red-hover: #F40612;
+    --nf-black: #141414;
+    --nf-dark: #181818;
+    --nf-dark2: #232323;
+    --nf-text: #FFFFFF;
+    --nf-muted: #ADADAD;
+    --nf-sub: #737373;
+    --nf-green: #46D369;
+    --nf-border: rgba(255, 255, 255, 0.15);
+    --nf-transition: all 0.2s ease;
+    --focus-glow: 0 0 0 3px #FFFFFF, 0 0 20px rgba(229, 9, 20, 0.7);
+}
+
+/* ==========================================================================
+   1. Reset & Base
+   ========================================================================== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: var(--nf-black);
+    color: var(--nf-text);
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    overflow-x: hidden;
+    line-height: 1.4;
+    user-select: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+body.no-scroll {
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+button {
+    cursor: pointer;
+    font-family: inherit;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--nf-black); }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* ==========================================================================
+   2. TV Sidebar — Left icon rail (visible only at ≥1200px via responsive.css)
+   ========================================================================== */
+.tv-sidebar {
+    display: none; /* shown in responsive.css at ≥1200px */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 72px;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.92);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 110;
+    flex-direction: column;
+    padding: 0;
+    transition: width 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    overflow: hidden;
+    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    flex-shrink: 0;
+}
+
+.tv-sidebar:hover {
+    width: 240px;
+}
+
+.tv-sidebar-logo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 20px 22px;
+    text-decoration: none;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    margin-bottom: 8px;
+}
+
+.tv-sidebar-logo svg {
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    color: var(--nf-red);
+    fill: var(--nf-red);
+}
+
+.logo-text {
+    color: var(--nf-red);
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    font-style: italic;
+}
+
+.tv-sidebar:hover .logo-text {
+    opacity: 1;
+}
+
+.tv-sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    padding: 4px 0;
+    overflow-y: auto;
+    scrollbar-width: none;
+}
+
+.tv-sidebar-nav::-webkit-scrollbar { display: none; }
+
+.tv-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 13px 22px;
+    color: var(--nf-muted);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color 0.2s, background 0.2s;
+    white-space: nowrap;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-left: 3px solid transparent;
+    background: transparent;
+    border-top: none;
+    border-right: none;
+    border-bottom: none;
+    width: 100%;
+    text-align: left;
+}
+
+.tv-sidebar-item svg {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tv-sidebar-item .label {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    overflow: hidden;
+}
+
+.tv-sidebar:hover .tv-sidebar-item .label {
+    opacity: 1;
+}
+
+.tv-sidebar-item:hover {
+    color: var(--nf-text);
+    background: rgba(255, 255, 255, 0.07);
+}
+
+.tv-sidebar-item.active {
+    color: var(--nf-text);
+    border-left-color: var(--nf-red);
+    background: rgba(229, 9, 20, 0.08);
+}
+
+.tv-sidebar-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.09);
+    margin: 10px 16px;
+    flex-shrink: 0;
+}
+
+/* ==========================================================================
+   3. Top Header — PC / Tablet / Mobile
+   ========================================================================== */
+.main-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4%;
+    z-index: 100;
+    background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, transparent 100%);
+    transition: background-color 0.4s ease, box-shadow 0.4s ease;
+}
+
+.main-header.scrolled {
+    background-color: var(--nf-black);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.9);
+    background-image: none;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+}
+
+/* Logo */
+.brand-logo {
+    display: flex;
+    align-items: baseline;
+    text-decoration: none;
+    line-height: 1;
+    gap: 0;
+}
+
+.logo-stream {
+    color: var(--nf-text);
+    font-size: 1.75rem;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+.logo-flix {
+    color: var(--nf-red);
+    font-size: 1.75rem;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+/* Desktop Nav */
+.main-nav {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 400;
+    transition: color 0.2s;
+    padding: 4px 0;
+}
+
+.nav-link:hover {
+    color: var(--nf-text);
+}
+
+.nav-link.active {
+    color: var(--nf-text);
+    font-weight: 700;
+}
+
+/* Right side header */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.header-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--nf-text);
+    cursor: pointer;
+    padding: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    transition: opacity 0.2s;
+}
+
+.header-icon-btn:hover {
+    opacity: 0.7;
+}
+
+.header-icon-btn svg {
+    width: 20px;
+    height: 20px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.header-btn {
+    background: transparent;
+    border: none;
+    color: var(--nf-text);
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 0.2s;
+    font-weight: 500;
+}
+
+.header-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.header-btn.highlight {
+    background: rgba(229, 9, 20, 0.15);
+    border: 1px solid rgba(229, 9, 20, 0.5);
+    font-size: 0.8rem;
+    font-weight: 700;
+}
+
+.header-btn.highlight:hover {
+    background: var(--nf-red);
+    border-color: var(--nf-red);
+}
+
+/* ==========================================================================
+   4. Hero Billboard — Netflix-accurate full-bleed
+   ========================================================================== */
+.hero-banner {
+    position: relative;
+    width: 100%;
+    min-height: 56.25vw;
+    max-height: 95vh;
+    background-size: cover;
+    background-position: center 20%;
+    background-color: #000;
+    display: flex;
+    align-items: flex-end;
+    padding: 0 4% 14vh;
+    overflow: hidden;
+}
+
+/* Bottom gradient — most important for legibility */
+.hero-banner::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        #141414 3%,
+        rgba(20, 20, 20, 0.85) 25%,
+        rgba(20, 20, 20, 0.5) 50%,
+        rgba(20, 20, 20, 0.2) 70%,
+        transparent 100%
+    );
+    pointer-events: none;
+}
+
+/* Left vignette for text contrast */
+.hero-banner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to right,
+        rgba(20, 20, 20, 0.85) 0%,
+        rgba(20, 20, 20, 0.5) 40%,
+        transparent 75%
+    );
+    pointer-events: none;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 2;
+    max-width: 580px;
+}
+
+/* "N SERIES" / "N FILM" label above title */
+.hero-top-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--nf-text);
+}
+
+.nf-label {
+    color: var(--nf-red);
+    font-size: 1.1rem;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: 1px;
+}
+
+.hero-title {
+    font-size: clamp(2rem, 4.5vw, 3.8rem);
+    font-weight: 900;
+    line-height: 1.05;
+    margin-bottom: 14px;
+    text-shadow: 2px 4px 16px rgba(0, 0, 0, 0.7);
+    letter-spacing: -0.5px;
+}
+
+.hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    font-size: 0.9rem;
+}
+
+.hero-rating {
+    color: var(--nf-green);
+    font-weight: 700;
+}
+
+.hero-year {
+    color: var(--nf-muted);
+}
+
+.hero-overview {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.85);
+    line-height: 1.55;
+    max-width: 460px;
+    margin-bottom: 22px;
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.hero-actions {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* ==========================================================================
+   5. Buttons
+   ========================================================================== */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 26px;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    transition: var(--nf-transition);
+    white-space: nowrap;
+    font-family: inherit;
+}
+
+.btn svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+}
+
+/* White play button (Netflix standard) */
+.btn-play, .btn-primary {
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+.btn-play:hover, .btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.78);
+}
+
+/* Grey info button */
+.btn-info, .btn-secondary {
+    background-color: rgba(109, 109, 110, 0.7);
+    color: #FFFFFF;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.btn-info:hover, .btn-secondary:hover {
+    background-color: rgba(109, 109, 110, 0.45);
+}
+
+/* ==========================================================================
+   6. Content Rows — Netflix horizontal carousel
+   ========================================================================== */
+.main-content {
+    position: relative;
+    z-index: 10;
+    margin-top: -80px;
+    padding-bottom: 80px;
+}
+
+.content-row {
+    position: relative;
+    margin-bottom: 36px;
+    padding: 0 4%;
+}
+
+.row-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--nf-text);
+    margin-bottom: 10px;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+
+.row-title:hover {
+    color: #DDD;
+}
+
+.row-more {
+    font-size: 0.75rem;
+    color: #54B9C5;
+    font-weight: 600;
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.content-row:hover .row-more {
+    opacity: 1;
+}
+
+.row-cards {
+    display: flex;
+    gap: 4px;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-behavior: smooth;
+    padding: 8px 0 24px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+.row-cards::-webkit-scrollbar {
+    display: none;
+}
+
+/* Desktop scroll arrows */
+.row-nav-btn {
+    position: absolute;
+    top: 28px;
+    height: calc(100% - 52px);
+    width: 60px;
+    background: rgba(20, 20, 20, 0.6);
+    border: none;
+    color: var(--nf-text);
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 15;
+    opacity: 0;
+    transition: opacity 0.3s ease, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.row-nav-btn.prev {
+    left: 0;
+    border-radius: 0 4px 4px 0;
+}
+
+.row-nav-btn.next {
+    right: 0;
+    border-radius: 4px 0 0 4px;
+}
+
+.content-row:hover .row-nav-btn {
+    opacity: 1;
+}
+
+.row-nav-btn:hover {
+    background: rgba(20, 20, 20, 0.95);
+}
+
+/* ==========================================================================
+   7. Media Cards — Netflix poster style (2:3)
+   ========================================================================== */
+.card {
+    position: relative;
+    flex: 0 0 160px;
+    border-radius: 4px;
+    overflow: visible;
+    background-color: var(--nf-dark2);
+    cursor: pointer;
+    transition: transform 0.28s cubic-bezier(0.2, 0.9, 0.3, 1), box-shadow 0.28s ease;
+    transform-origin: center;
+}
+
+.card:hover {
+    transform: scale(1.08);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+    z-index: 5;
+}
+
+.card-poster-wrapper {
+    width: 100%;
+    aspect-ratio: 2 / 3;
+    overflow: hidden;
+    border-radius: 4px;
+    position: relative;
+}
+
+.card-poster {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.28s ease;
+}
+
+.card:hover .card-poster {
+    transform: scale(1.05);
+}
+
+/* Info overlay on hover */
+.card-overlay, .card-info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(0deg, rgba(0,0,0,0.96) 0%, rgba(0,0,0,0.72) 50%, transparent 100%);
+    padding: 10px;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    border-radius: 0 0 4px 4px;
+}
+
+.card:hover .card-overlay,
+.card:hover .card-info-overlay {
+    opacity: 1;
+}
+
+.card-actions {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.card-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    background: rgba(42, 42, 42, 0.85);
+    color: var(--nf-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.card-btn:hover {
+    border-color: var(--nf-text);
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.card-btn.play-btn {
+    background: var(--nf-text);
+    color: #000;
+    border-color: var(--nf-text);
+}
+
+.card-btn.play-btn:hover {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.card-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+    line-height: 1.3;
+}
+
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.72rem;
+    flex-wrap: wrap;
+}
+
+.card-match {
+    color: var(--nf-green);
+    font-weight: 700;
+}
+
+.card-year {
+    color: var(--nf-muted);
+}
+
+.card-badge {
+    border: 1px solid var(--nf-muted);
+    padding: 0 3px;
+    border-radius: 2px;
+    font-size: 0.62rem;
+    color: var(--nf-muted);
+}
+
+/* Series / Movie type badge (top-left on card) */
+.card-type-tag {
+    position: absolute;
+    top: 6px;
+    left: 6px;
+    background: rgba(229, 9, 20, 0.9);
+    color: var(--nf-text);
+    font-size: 0.58rem;
+    font-weight: 800;
+    padding: 2px 5px;
+    border-radius: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    z-index: 2;
+}
+
+/* ==========================================================================
+   8. Continue Watching Cards — 16:9 wide
+   ========================================================================== */
+.continue-watching-row .row-title {
+    font-size: 1.35rem;
+}
+
+.continue-card {
+    flex: 0 0 280px;
+    aspect-ratio: 16 / 9;
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.continue-card:hover {
+    transform: scale(1.04);
+    z-index: 5;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.8);
+}
+
+.continue-card .card-poster-wrapper {
+    aspect-ratio: 16 / 9;
+}
+
+.progress-bar-container {
+    position: absolute;
+    bottom: 4px;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+    z-index: 3;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background: var(--nf-red);
+    border-radius: 0 2px 2px 0;
+    transition: width 0.4s ease;
+}
+
+.continue-overlay {
+    background: linear-gradient(0deg, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.55) 50%, transparent 100%) !important;
+}
+
+.card-ep {
+    font-size: 0.72rem;
+    color: var(--nf-red);
+    font-weight: 700;
+    display: block;
+    margin-top: 2px;
+}
+
+.continue-time-badge {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(0, 0, 0, 0.72);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: var(--nf-text);
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    z-index: 2;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.continue-card:hover .continue-time-badge {
+    opacity: 0.35;
+}
+
+.card-time-remaining {
+    font-size: 0.7rem;
+    color: #e8e8e8;
+    background: rgba(229, 9, 20, 0.2);
+    border: 1px solid rgba(229, 9, 20, 0.4);
+    display: inline-block;
+    padding: 1px 5px;
+    border-radius: 2px;
+    margin-top: 3px;
+    font-weight: 600;
+}
+
+/* ==========================================================================
+   9. Detail Modal — Netflix expand style
+   ========================================================================== */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 200;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background-color: var(--nf-dark);
+    width: 100%;
+    max-width: 850px;
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.25s ease-out;
+    scrollbar-width: thin;
+    scrollbar-color: #333 var(--nf-dark);
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: scale(0.94) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-close-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    width: 36px;
+    height: 36px;
+    background: rgba(20, 20, 20, 0.85);
+    border: none;
+    border-radius: 50%;
+    color: var(--nf-text);
+    font-size: 1.35rem;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.modal-close-btn:hover {
+    background: var(--nf-text);
+    color: #000;
+}
+
+/* Backdrop image section */
+.detail-backdrop {
+    width: 100%;
+    height: 370px;
+    background-size: cover;
+    background-position: center top;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 28px;
+    flex-shrink: 0;
+}
+
+.detail-backdrop-gradient {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(0deg, #181818 0%, rgba(24,24,24,0.55) 50%, transparent 100%);
+    pointer-events: none;
+}
+
+.detail-header-content {
+    position: relative;
+    z-index: 2;
+}
+
+.detail-title {
+    font-size: 2.2rem;
+    font-weight: 800;
+    margin-bottom: 14px;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.9);
+    line-height: 1.1;
+}
+
+.detail-header-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Body */
+.detail-body {
+    padding: 26px 28px;
+}
+
+.detail-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+}
+
+.detail-match {
+    color: var(--nf-green);
+    font-weight: 700;
+}
+
+.detail-year {
+    color: var(--nf-muted);
+}
+
+.detail-badge {
+    border: 1px solid var(--nf-sub);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.72rem;
+    color: var(--nf-muted);
+}
+
+.detail-overview {
+    font-size: 0.98rem;
+    line-height: 1.6;
+    color: #DDD;
+    margin-bottom: 20px;
+}
+
+.detail-tags {
+    margin-bottom: 22px;
+    font-size: 0.88rem;
+    color: var(--nf-muted);
+    line-height: 1.9;
+}
+
+.detail-tags strong {
+    color: var(--nf-text);
+}
+
+/* Episodes section */
+.seasons-section {
+    margin-top: 28px;
+    border-top: 1px solid var(--nf-border);
+    padding-top: 22px;
+}
+
+.seasons-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+}
+
+.seasons-header h3 {
+    font-size: 1.35rem;
+    font-weight: 700;
+}
+
+.season-select {
+    background: var(--nf-black);
+    color: var(--nf-text);
+    border: 1px solid var(--nf-border);
+    padding: 7px 14px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+}
+
+.season-select:focus {
+    border-color: var(--nf-text);
+}
+
+.episodes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.episode-card {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 14px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.03);
+    cursor: pointer;
+    transition: background 0.2s;
+    border: 1px solid transparent;
+}
+
+.episode-card:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+.ep-num {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--nf-muted);
+    min-width: 24px;
+    text-align: center;
+}
+
+.ep-thumb-wrapper {
+    position: relative;
+    width: 136px;
+    height: 78px;
+    border-radius: 4px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--nf-dark2);
+}
+
+.ep-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ep-play-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    border: 2px solid var(--nf-text);
+    color: var(--nf-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.episode-card:hover .ep-play-icon {
+    opacity: 1;
+}
+
+.ep-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ep-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    gap: 10px;
+}
+
+.ep-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ep-duration {
+    font-size: 0.82rem;
+    color: var(--nf-muted);
+    flex-shrink: 0;
+}
+
+.ep-overview {
+    font-size: 0.82rem;
+    color: var(--nf-muted);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.45;
+}
+
+/* Similar titles */
+.similar-section {
+    margin-top: 32px;
+    border-top: 1px solid var(--nf-border);
+    padding-top: 22px;
+}
+
+.similar-section h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 14px;
+}
+
+.similar-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+/* ==========================================================================
+   10. Player Modal
+   ========================================================================== */
+.player-modal {
+    position: fixed;
+    inset: 0;
+    background-color: #000;
+    z-index: 1000;
+    display: none;
+    flex-direction: column;
+}
+
+.player-modal.active {
+    display: flex;
+}
+
+.player-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    padding: 16px 28px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: linear-gradient(180deg, rgba(0,0,0,0.9) 0%, transparent 100%);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.player-modal:hover .player-header,
+.player-modal.tv-focused .player-header {
+    opacity: 1;
+}
+
+.player-header-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.player-back-btn {
+    background: transparent;
+    border: none;
+    color: var(--nf-text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 50%;
+    transition: background 0.2s;
+}
+
+.player-back-btn:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.player-back-btn svg {
+    width: 26px;
+    height: 26px;
+}
+
+.player-info h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+
+.player-info span {
+    font-size: 0.88rem;
+    color: var(--nf-muted);
+    display: block;
+}
+
+.player-header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--nf-text);
+    padding: 7px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 600;
+    transition: var(--nf-transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: inherit;
+}
+
+.player-btn:hover {
+    background: var(--nf-text);
+    color: #000;
+}
+
+.player-btn svg {
+    width: 18px;
+    height: 18px;
+}
+
+.player-iframe-wrapper {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.player-iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+}
+
+/* Auto-next overlay */
+.player-auto-next {
+    position: absolute;
+    bottom: 50px;
+    right: 50px;
+    background: rgba(20, 20, 20, 0.95);
+    border: 1px solid var(--nf-border);
+    padding: 20px 24px;
+    border-radius: 8px;
+    z-index: 20;
+    box-shadow: 0 10px 32px rgba(0, 0, 0, 0.8);
+    display: none;
+    animation: slideUp 0.3s ease-out;
+    min-width: 260px;
+}
+
+.player-auto-next.active {
+    display: block;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+}
+
+.auto-next-label {
+    font-size: 0.78rem;
+    color: var(--nf-muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+}
+
+.auto-next-content h4 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+}
+
+.auto-next-countdown {
+    font-size: 0.88rem;
+    color: var(--nf-muted);
+    margin-bottom: 14px;
+}
+
+.auto-next-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* ==========================================================================
+   11. Search Overlay
+   ========================================================================== */
+.search-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: var(--nf-black);
+    z-index: 150;
+    display: none;
+    flex-direction: column;
+    padding: 22px 4%;
+    overflow-y: auto;
+}
+
+.search-overlay.active {
+    display: flex;
+}
+
+.search-bar-header {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 32px;
+    padding-top: 8px;
+}
+
+.search-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon-inside {
+    position: absolute;
+    left: 16px;
+    width: 20px;
+    height: 20px;
+    color: var(--nf-muted);
+    pointer-events: none;
+}
+
+.search-input {
+    width: 100%;
+    background: #2b2b2b;
+    border: 2px solid transparent;
+    padding: 14px 20px 14px 50px;
+    border-radius: 6px;
+    color: var(--nf-text);
+    font-size: 1.15rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+}
+
+.search-input:focus {
+    border-color: var(--nf-text);
+    background: #1e1e1e;
+}
+
+.search-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--nf-text);
+    font-size: 2rem;
+    cursor: pointer;
+    padding: 4px 10px;
+    line-height: 1;
+}
+
+.search-results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(165px, 1fr));
+    gap: 14px;
+    padding-bottom: 40px;
+}
+
+.search-placeholder {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--nf-muted);
+    font-size: 1.15rem;
+    margin-top: 60px;
+}
+
+/* ==========================================================================
+   12. Forms — Quick ID & Settings
+   ========================================================================== */
+.form-modal-content {
+    background-color: var(--nf-dark);
+    max-width: 500px;
+    border-radius: 8px;
+    padding: 30px;
+    position: relative;
+    width: 100%;
+    animation: modalIn 0.25s ease-out;
+}
+
+.form-title {
+    font-size: 1.45rem;
+    font-weight: 700;
+    margin-bottom: 22px;
+}
+
+.form-group {
+    margin-bottom: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.form-group label {
+    font-size: 0.88rem;
+    color: var(--nf-muted);
+    font-weight: 600;
+}
+
+.form-control {
+    background: #2b2b2b;
+    border: 1px solid var(--nf-border);
+    border-radius: 4px;
+    padding: 10px 13px;
+    color: var(--nf-text);
+    font-size: 0.98rem;
+    outline: none;
+    font-family: inherit;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: var(--nf-red);
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.form-hint {
+    font-size: 0.78rem;
+    color: var(--nf-sub);
+}
+
+.form-actions {
+    margin-top: 22px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.settings-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-row label {
+    margin: 0;
+}
+
+.settings-checkbox {
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    accent-color: var(--nf-red);
+}
+
+/* ==========================================================================
+   13. Pages — Grid, Empty State
+   ========================================================================== */
+.grid-section {
+    padding: 90px 4% 40px;
+}
+
+.section-title {
+    font-size: 1.7rem;
+    font-weight: 700;
+    margin-bottom: 22px;
+}
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 14px;
+}
+
+.empty-state {
+    padding: 120px 4% 60px;
+    text-align: center;
+    color: var(--nf-muted);
+}
+
+.empty-state h3 {
+    font-size: 1.7rem;
+    margin-bottom: 10px;
+    color: var(--nf-text);
+}
+
+.loading-spinner {
+    text-align: center;
+    padding: 40px;
+    font-size: 1.05rem;
+    color: var(--nf-muted);
+}
+
+/* ==========================================================================
+   14. Global Loader
+   ========================================================================== */
+.global-loader {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: rgba(20, 20, 20, 0.92);
+    border: 1px solid var(--nf-border);
+    padding: 9px 16px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    font-size: 0.88rem;
+    color: var(--nf-text);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.55);
+}
+
+.spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-top-color: var(--nf-red);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ==========================================================================
+   15. TV Mode — D-Pad spatial navigation focus styles
+   ========================================================================== */
+body.tv-mode {
+    cursor: none;
+}
+
+body.tv-mode .tv-focused,
+.card.tv-focused,
+button.tv-focused,
+.episode-card.tv-focused,
+a.tv-focused {
+    outline: none !important;
+    box-shadow: var(--focus-glow) !important;
+    transform: scale(1.1) !important;
+    z-index: 99 !important;
+    transition: transform 0.15s ease-out, box-shadow 0.15s ease-out !important;
+}
+
+body.tv-mode .card.tv-focused .card-overlay,
+body.tv-mode .card.tv-focused .card-info-overlay {
+    opacity: 1;
+}
+
+body.tv-mode .row-nav-btn {
+    display: none !important;
+}
+
+/* ==========================================================================
+   16. Mobile Bottom Nav — hidden on desktop, shown on ≤768px
+   ========================================================================== */
+.mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 60px;
+    background-color: #111;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 95;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+.mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    color: var(--nf-muted);
+    text-decoration: none;
+    font-size: 0.63rem;
+    padding: 5px 10px;
+    transition: color 0.2s;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.mobile-nav-item.active,
+.mobile-nav-item:hover {
+    color: var(--nf-text);
+}
+
+.mobile-nav-icon {
+    width: 22px;
+    height: 22px;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* ==========================================================================
+   17. Utility Animations
+   ========================================================================== */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
