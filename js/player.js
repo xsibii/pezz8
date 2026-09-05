@@ -14,6 +14,9 @@ const Player = {
     playbackCurrentTime: 0,
     hasReceivedPostMessage: false,
     lastProgressSaveTime: 0,
+    isDrawerOpen: false,
+    tvSeriesDetails: null,
+    cachedSeasonEpisodes: {},
 
     init() {
         this.container = document.getElementById('playerModal');
@@ -33,6 +36,29 @@ const Player = {
         const fsBtn = document.getElementById('playerFsBtn');
         if (fsBtn) {
             fsBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+
+        // Setup Quick Episodes Drawer buttons
+        const episodesBtn = document.getElementById('playerEpisodesBtn');
+        if (episodesBtn) {
+            episodesBtn.addEventListener('click', () => this.toggleEpisodesDrawer());
+        }
+
+        const episodesCloseBtn = document.getElementById('playerEpisodesCloseBtn');
+        if (episodesCloseBtn) {
+            episodesCloseBtn.addEventListener('click', () => this.closeEpisodesDrawer());
+        }
+
+        const episodesBackdrop = document.getElementById('playerEpisodesBackdrop');
+        if (episodesBackdrop) {
+            episodesBackdrop.addEventListener('click', () => this.closeEpisodesDrawer());
+        }
+
+        const seasonSelect = document.getElementById('playerSeasonSelect');
+        if (seasonSelect) {
+            seasonSelect.addEventListener('change', (e) => {
+                this.loadDrawerSeason(parseInt(e.target.value));
+            });
         }
 
         // Listen to vixsrc.to postMessage events
@@ -91,9 +117,14 @@ const Player = {
         this.show(url, item.title || item.name);
         this.updatePlayerHeader(item.title || item.name, null);
 
-        // Hide next episode button for movies
+        // Hide next episode and episodes list button for movies
         const nextBtn = document.getElementById('playerNextEpBtn');
         if (nextBtn) nextBtn.style.display = 'none';
+
+        const episodesBtn = document.getElementById('playerEpisodesBtn');
+        if (episodesBtn) episodesBtn.style.display = 'none';
+
+        this.closeEpisodesDrawer();
     },
 
     /**
@@ -155,9 +186,20 @@ const Player = {
         this.show(url, `${title} - S${this.currentSeason}E${this.currentEpisode}`);
         this.updatePlayerHeader(title, subTitle);
 
-        // Show next episode button if TV
+        // Show next episode and quick episodes list buttons
         const nextBtn = document.getElementById('playerNextEpBtn');
         if (nextBtn) nextBtn.style.display = 'inline-flex';
+
+        const episodesBtn = document.getElementById('playerEpisodesBtn');
+        if (episodesBtn) episodesBtn.style.display = 'inline-flex';
+
+        // Preload / cache TV details for drawer seasons
+        this.ensureTvDetails(item);
+
+        // Update active badge in drawer if open
+        if (this.isDrawerOpen) {
+            this.highlightActiveDrawerEpisode();
+        }
     },
 
     show(embedUrl, pageTitle = '') {
@@ -188,6 +230,8 @@ const Player = {
         if (!this.container) return;
         this.container.classList.remove('active');
         document.body.classList.remove('no-scroll');
+
+        this.closeEpisodesDrawer();
 
         // Save final watched state if we have a current item and position
         if (this.currentItem && this.playbackCurrentTime > 0) {
@@ -240,6 +284,217 @@ const Player = {
     playNextEpisode() {
         if (!this.currentItem || this.currentItem.media_type !== 'tv') return;
         this.playEpisode(this.currentItem, this.currentSeason, this.currentEpisode + 1);
+    },
+
+    /**
+     * Quick Episodes Drawer Methods
+     */
+    toggleEpisodesDrawer() {
+        if (this.isDrawerOpen) {
+            this.closeEpisodesDrawer();
+        } else {
+            this.openEpisodesDrawer();
+        }
+    },
+
+    async openEpisodesDrawer() {
+        if (!this.currentItem || this.currentItem.media_type !== 'tv') return;
+
+        const drawer = document.getElementById('playerEpisodesDrawer');
+        if (!drawer) return;
+
+        this.isDrawerOpen = true;
+        drawer.classList.add('active');
+        if (this.container) this.container.classList.add('drawer-open');
+
+        // Ensure TV details (with seasons list) are loaded
+        const tvData = await this.ensureTvDetails(this.currentItem);
+        this.setupDrawerSeasons(tvData);
+
+        // Load the currently playing season
+        const activeSeason = this.currentSeason || 1;
+        await this.loadDrawerSeason(activeSeason);
+    },
+
+    closeEpisodesDrawer() {
+        const drawer = document.getElementById('playerEpisodesDrawer');
+        if (drawer) {
+            drawer.classList.remove('active');
+        }
+        if (this.container) {
+            this.container.classList.remove('drawer-open');
+        }
+        this.isDrawerOpen = false;
+    },
+
+    async ensureTvDetails(item) {
+        if (this.tvSeriesDetails && this.tvSeriesDetails.id === item.id && this.tvSeriesDetails.seasons) {
+            return this.tvSeriesDetails;
+        }
+
+        if (item.seasons && item.seasons.length > 0) {
+            this.tvSeriesDetails = item;
+            return item;
+        }
+
+        try {
+            const fullDetails = await window.API.getDetails('tv', item.id);
+            if (fullDetails) {
+                this.tvSeriesDetails = { ...item, ...fullDetails };
+                return this.tvSeriesDetails;
+            }
+        } catch (err) {
+            console.warn('[Player] Impossibile recuperare dettagli serie per drawer:', err);
+        }
+
+        this.tvSeriesDetails = item;
+        return item;
+    },
+
+    setupDrawerSeasons(tvData) {
+        const seasonSelect = document.getElementById('playerSeasonSelect');
+        if (!seasonSelect) return;
+
+        seasonSelect.innerHTML = '';
+        const seasons = (tvData && tvData.seasons) ? tvData.seasons.filter(s => s.season_number > 0) : [];
+
+        if (seasons.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = this.currentSeason || 1;
+            opt.textContent = `Stagione ${this.currentSeason || 1}`;
+            seasonSelect.appendChild(opt);
+            return;
+        }
+
+        seasons.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.season_number;
+            opt.textContent = `${s.name || 'Stagione ' + s.season_number} (${s.episode_count} ep.)`;
+            if (s.season_number === this.currentSeason) {
+                opt.selected = true;
+            }
+            seasonSelect.appendChild(opt);
+        });
+
+        seasonSelect.value = this.currentSeason || 1;
+    },
+
+    async loadDrawerSeason(seasonNumber) {
+        const listEl = document.getElementById('playerEpisodesList');
+        if (!listEl) return;
+
+        listEl.innerHTML = '<div class="loading-spinner" style="padding:40px; text-align:center; color:#aaa;">Caricamento episodi...</div>';
+
+        const tvId = this.currentItem.id;
+        const cacheKey = `${tvId}_s${seasonNumber}`;
+
+        let seasonData = this.cachedSeasonEpisodes[cacheKey];
+        if (!seasonData) {
+            try {
+                seasonData = await window.API.getSeasonDetails(tvId, seasonNumber);
+                if (seasonData) {
+                    this.cachedSeasonEpisodes[cacheKey] = seasonData;
+                }
+            } catch (err) {
+                console.warn('[Player] Errore caricamento stagione drawer:', err);
+            }
+        }
+
+        listEl.innerHTML = '';
+
+        if (!seasonData || !seasonData.episodes || seasonData.episodes.length === 0) {
+            listEl.innerHTML = '<p style="color:#aaa; text-align:center; padding:40px 10px;">Nessun episodio trovato per questa stagione.</p>';
+            return;
+        }
+
+        const episodes = seasonData.episodes;
+        const totalEpCount = episodes.length;
+
+        episodes.forEach(ep => {
+            const isPlaying = (this.currentSeason === seasonNumber && this.currentEpisode === ep.episode_number);
+            const card = document.createElement('div');
+            card.className = `player-ep-card focusable ${isPlaying ? 'is-active' : ''}`;
+            card.tabIndex = 0;
+            card.dataset.season = seasonNumber;
+            card.dataset.episode = ep.episode_number;
+
+            const stillUrl = window.API.getImageUrl(
+                ep.still_path || (this.tvSeriesDetails && this.tvSeriesDetails.backdrop_path),
+                'w300'
+            );
+
+            card.innerHTML = `
+                <div class="player-ep-thumb-wrapper">
+                    <img src="${stillUrl}" alt="${ep.name}" class="player-ep-thumb" loading="lazy" />
+                    <span class="player-ep-num-badge">EP ${ep.episode_number}</span>
+                    <div class="player-ep-play-overlay">
+                        <div class="player-ep-play-icon">&#9658;</div>
+                    </div>
+                </div>
+                <div class="player-ep-info">
+                    ${isPlaying ? '<span class="player-ep-active-label"><span>&#9654;</span> In riproduzione</span>' : ''}
+                    <h4 class="player-ep-title">${ep.name || 'Episodio ' + ep.episode_number}</h4>
+                    <div class="player-ep-meta">
+                        <span>Ep. ${ep.episode_number}</span>
+                        ${ep.runtime ? `<span>• ${ep.runtime}m</span>` : ''}
+                    </div>
+                    ${ep.overview ? `<p class="player-ep-desc">${ep.overview}</p>` : ''}
+                </div>
+            `;
+
+            card.addEventListener('click', () => {
+                const epRuntime = ep.runtime || (this.tvSeriesDetails && this.tvSeriesDetails.episode_run_time ? this.tvSeriesDetails.episode_run_time[0] : 45);
+                this.closeEpisodesDrawer();
+                this.playEpisode(
+                    { ...(this.tvSeriesDetails || this.currentItem), runtime: epRuntime },
+                    seasonNumber,
+                    ep.episode_number,
+                    totalEpCount,
+                    null,
+                    ep.name
+                );
+            });
+
+            listEl.appendChild(card);
+        });
+
+        // Scroll active episode into view
+        const activeCard = listEl.querySelector('.player-ep-card.is-active');
+        if (activeCard) {
+            setTimeout(() => {
+                activeCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                if (document.body.classList.contains('tv-mode')) {
+                    activeCard.focus();
+                }
+            }, 100);
+        }
+    },
+
+    highlightActiveDrawerEpisode() {
+        const listEl = document.getElementById('playerEpisodesList');
+        if (!listEl) return;
+
+        listEl.querySelectorAll('.player-ep-card').forEach(card => {
+            const s = parseInt(card.dataset.season);
+            const e = parseInt(card.dataset.episode);
+            const isPlaying = (s === this.currentSeason && e === this.currentEpisode);
+            if (isPlaying) {
+                card.classList.add('is-active');
+                if (!card.querySelector('.player-ep-active-label')) {
+                    const info = card.querySelector('.player-ep-info');
+                    if (info) {
+                        const label = document.createElement('span');
+                        label.className = 'player-ep-active-label';
+                        label.innerHTML = '<span>&#9654;</span> In riproduzione';
+                        info.insertBefore(label, info.firstChild);
+                    }
+                }
+            } else {
+                card.classList.remove('is-active');
+                const label = card.querySelector('.player-ep-active-label');
+                if (label) label.remove();
+            }
+        });
     },
 
     /**

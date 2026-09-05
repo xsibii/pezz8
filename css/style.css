@@ -1348,6 +1348,273 @@ body.no-hero .main-content {
 }
 
 /* ==========================================================================
+   Quick Episodes Drawer inside Player
+   ========================================================================== */
+.player-episodes-drawer {
+    position: absolute;
+    inset: 0;
+    z-index: 40;
+    display: none;
+}
+
+.player-episodes-drawer.active {
+    display: block;
+}
+
+.player-modal.drawer-open .player-header {
+    opacity: 1 !important;
+    pointer-events: all !important;
+}
+
+.player-episodes-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+}
+
+.player-episodes-panel {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 440px;
+    max-width: 90vw;
+    height: 100%;
+    background: rgba(18, 18, 18, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+    display: flex;
+    flex-direction: column;
+    box-shadow: -12px 0 35px rgba(0, 0, 0, 0.85);
+    z-index: 2;
+    animation: drawerSlideInRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drawerSlideInRight {
+    from { transform: translateX(100%); }
+    to   { transform: translateX(0); }
+}
+
+.player-episodes-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 22px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-shrink: 0;
+}
+
+.player-episodes-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.player-episodes-title-wrap h3 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--nf-text);
+    margin: 0;
+    letter-spacing: -0.3px;
+}
+
+.player-season-dropdown-wrapper {
+    position: relative;
+}
+
+.player-season-select {
+    background-color: rgba(40, 40, 40, 0.9);
+    color: var(--nf-text);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 6px 30px 6px 12px;
+    border-radius: 4px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 8px center;
+    background-size: 14px;
+    transition: var(--nf-transition);
+}
+
+.player-season-select:hover,
+.player-season-select:focus {
+    border-color: #FFF;
+    background-color: rgba(55, 55, 55, 0.95);
+}
+
+.player-drawer-close-btn {
+    background: transparent;
+    border: none;
+    color: var(--nf-text);
+    font-size: 1.8rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+}
+
+.player-drawer-close-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.player-episodes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    scrollbar-width: thin;
+}
+
+.player-ep-card {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 6px;
+    background: rgba(35, 35, 35, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    cursor: pointer;
+    transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+    position: relative;
+}
+
+.player-ep-card:hover,
+.player-ep-card.tv-focused {
+    background: rgba(55, 55, 55, 0.85);
+    border-color: rgba(255, 255, 255, 0.35);
+    transform: translateX(-3px);
+}
+
+.player-ep-card.is-active {
+    background: rgba(229, 9, 20, 0.18);
+    border-color: var(--nf-red);
+    box-shadow: 0 0 16px rgba(229, 9, 20, 0.3);
+}
+
+.player-ep-thumb-wrapper {
+    position: relative;
+    flex: 0 0 115px;
+    height: 65px;
+    border-radius: 4px;
+    overflow: hidden;
+    background: #252525;
+}
+
+.player-ep-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.player-ep-num-badge {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    background: rgba(0, 0, 0, 0.75);
+    color: #FFF;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.player-ep-play-overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.35);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.player-ep-card:hover .player-ep-play-overlay,
+.player-ep-card.is-active .player-ep-play-overlay {
+    opacity: 1;
+}
+
+.player-ep-play-icon {
+    width: 24px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #000;
+    font-size: 0.7rem;
+    padding-left: 2px;
+}
+
+.player-ep-card.is-active .player-ep-play-icon {
+    background: var(--nf-red);
+    color: #FFF;
+}
+
+.player-ep-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.player-ep-active-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--nf-red);
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 2px;
+}
+
+.player-ep-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--nf-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 2px;
+}
+
+.player-ep-meta {
+    font-size: 0.74rem;
+    color: var(--nf-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.player-ep-desc {
+    font-size: 0.72rem;
+    color: #AAA;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    margin-top: 4px;
+    line-height: 1.35;
+}
+
+/* ==========================================================================
    11. Search Overlay
    ========================================================================== */
 .search-overlay {

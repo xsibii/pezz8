@@ -247,6 +247,17 @@
             </div>
         </div>
         <div class="player-header-right">
+            <button class="player-btn focusable" id="playerEpisodesBtn" style="display:none;" title="Lista Episodi">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px;">
+                    <line x1="8" y1="6" x2="21" y2="6"></line>
+                    <line x1="8" y1="12" x2="21" y2="12"></line>
+                    <line x1="8" y1="18" x2="21" y2="18"></line>
+                    <line x1="3" y1="6" x2="3.01" y2="6"></line>
+                    <line x1="3" y1="12" x2="3.01" y2="12"></line>
+                    <line x1="3" y1="18" x2="3.01" y2="18"></line>
+                </svg>
+                <span class="player-btn-text">Episodi</span>
+            </button>
             <button class="player-btn focusable" id="playerNextEpBtn" style="display:none;">
                 Prossimo ep. &#10095;
             </button>
@@ -255,6 +266,25 @@
                     <path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/>
                 </svg>
             </button>
+        </div>
+    </div>
+
+    <!-- Quick Episodes Drawer inside Player -->
+    <div class="player-episodes-drawer" id="playerEpisodesDrawer">
+        <div class="player-episodes-backdrop" id="playerEpisodesBackdrop"></div>
+        <div class="player-episodes-panel">
+            <div class="player-episodes-header">
+                <div class="player-episodes-title-wrap">
+                    <h3>Episodi</h3>
+                    <div class="player-season-dropdown-wrapper">
+                        <select class="season-select player-season-select focusable" id="playerSeasonSelect"></select>
+                    </div>
+                </div>
+                <button class="player-drawer-close-btn focusable" id="playerEpisodesCloseBtn" aria-label="Chiudi lista episodi">&times;</button>
+            </div>
+            <div class="player-episodes-list" id="playerEpisodesList">
+                <div class="loading-spinner">Caricamento episodi...</div>
+            </div>
         </div>
     </div>
 

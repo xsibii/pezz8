@@ -62,6 +62,11 @@ const TVNav = {
         // Active Player or Modals Handle Back First
         if (isBack) {
             if (window.Player && window.Player.container && window.Player.container.classList.contains('active')) {
+                if (window.Player.isDrawerOpen) {
+                    e.preventDefault();
+                    window.Player.closeEpisodesDrawer();
+                    return;
+                }
                 e.preventDefault();
                 window.Player.close();
                 return;
