@@ -26,6 +26,13 @@ const App = {
         // Check if there are URL parameters (e.g. ?play=movie&id=123)
         this.handleUrlParams();
 
+        // Check PWA Standalone Mode (Home Screen Web App)
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        if (isStandalone) {
+            document.body.classList.add('pwa-mode');
+            console.log('[PWA] Standalone mode attiva');
+        }
+
         // Register Service Worker for PWA
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
