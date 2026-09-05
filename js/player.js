@@ -215,8 +215,11 @@ const Player = {
         // Reset postMessage reception flag
         this.hasReceivedPostMessage = false;
 
-        // Set iframe source
-        this.iframe.src = embedUrl;
+        // Ensure no-referrer policy so Cloudflare does not block github.io domains
+        if (this.iframe) {
+            this.iframe.referrerPolicy = 'no-referrer';
+            this.iframe.src = embedUrl;
+        }
         this.container.classList.add('active');
         document.body.classList.add('no-scroll');
 
